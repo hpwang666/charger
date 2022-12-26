@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wwp.mapper.SysPermissionMapper">
+
+
+    <resultMap id="TreeModel" type="com.wwp.model.TreeModel" >
+        <result column="id" property="key" jdbcType="VARCHAR"/>
+        <result column="name" property="title" jdbcType="VARCHAR"/>
+        <result column="parent_id" property="parentId" jdbcType="VARCHAR"/>
+        <result column="is_leaf" property="isLeaf" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.wwp.entity.SysPermission">
+        insert into sys_permission (id, `name`, parent_id,resource_type, url,sort_no, component, permission,is_leaf, del_flag)
+        values(
+            #{sysPermission.id,jdbcType=VARCHAR},
+            #{sysPermission.name,jdbcType=VARCHAR},
+            #{sysPermission.parentId,jdbcType=VARCHAR},
+            #{sysPermission.resourceType,jdbcType=VARCHAR},
+            #{sysPermission.url,jdbcType=VARCHAR},
+            #{sysPermission.sortNo,jdbcType=DOUBLE},
+            #{sysPermission.component,jdbcType=VARCHAR},
+            #{sysPermission.permission,jdbcType=VARCHAR},
+            #{sysPermission.isLeaf,jdbcType=TINYINT},
+            #{sysPermission.delFlag,jdbcType=TINYINT}
+        )
+    </insert >
+
+    <update id="update" parameterType="com.wwp.entity.SysPermission">
+        update sys_permission
+        <trim prefix="set" suffixOverrides=",">
+            <if test="name!=null">`name`=#{name,jdbcType=VARCHAR},</if>
+            <if test="parentId!=null">parent_id=#{parentId,jdbcType=VARCHAR},</if>
+            <if test="resourceType!=null">resource_type=#{resourceType,jdbcType=VARCHAR},</if>
+            <if test="url!=null">url=#{url,jdbcType=VARCHAR},</if>
+            <if test="sortNo!=null">sort_no=#{sortNo,jdbcType=DOUBLE},</if>
+            <if test="component!=null">component=#{component,jdbcType=VARCHAR},</if>
+            <if test="permission!=null">permission=#{permission,jdbcType=VARCHAR},</if>
+            <if test="isLeaf!=null">is_leaf=#{isLeaf,jdbcType=TINYINT},</if>
+            <if test="delFlag != null">del_flag = #{delFlag,jdbcType=TINYINT},</if>
+        </trim>
+        WHERE id =#{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 获取登录用户拥有的权限 -->
+    <select id="queryByUser" resultType="com.wwp.entity.SysPermission">
+
+        SELECT p.*
+        FROM  sys_permission p
+        WHERE (exists(
+        select a.role_id from sys_role_permission a
+        join sys_role b on a.role_id = b.id
+        join sys_user_role c on c.role_id = b.id
+        join sys_user d on d.id = c.user_id
+        where p.id = a.permission_id AND d.username = #{username,jdbcType=VARCHAR}
+        )
+        )
+
+    </select>
+
+    <select id="queryListByParentId" parameterType="Object"  resultMap="TreeModel">
+        SELECT
+        id
+        ,parent_id
+        ,`name`
+        ,is_leaf
+        FROM   sys_permission
+        WHERE 1=1
+        <choose>
+            <when test="parentId != null and parentId != ''">
+                AND parent_id =  #{parentId,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                AND parent_id is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="countByParentId" resultType="int">
+        select count(1) from sys_permission where parent_id = #{parentId}
+    </select>
+
+    <select id="queryPermissionByIdList" parameterType="Object"  resultType="com.wwp.entity.SysPermission">
+    select * from `sys_permission` where `id` in
+        <foreach collection="ids" item="id"  open="(" separator="," close=")">
+        #{id}
+         </foreach>
+       and del_flag != '1'
+       order by `sort_no` ASC
+    </select>
+
+
+
+</mapper>

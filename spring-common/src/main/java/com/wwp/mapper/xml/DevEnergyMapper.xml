@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wwp.mapper.DevEnergyMapper">
+
+
+    <insert id="addDevEnergyMapper" useGeneratedKeys="true" keyProperty="id">
+
+        INSERT INTO dev_energy set serial_num=#{serialNum},parent_id=#{parentId},`version`=#{version},heart_beat_time=#{heartBeatTime},online_status=#{onlineStatus}
+    </insert>
+
+    <select id="getDevEnergy" resultType="com.wwp.entity.DevEnergy">
+		select * from  dev_energy where serial_num = #{serialNum}
+	</select>
+
+    <update id="updateHeartBeatTime">
+        update dev_energy
+        set   heart_beat_time=#{heartBeatTime}
+        where serial_num = #{serialNum}
+    </update>
+
+    <update id="updateVersion">
+        update dev_energy
+        set   version=#{version}
+        where serial_num = #{serialNum}
+    </update>
+
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wwp.mapper.EnergyMapper">
+
+
+    <insert id="addEnergy" useGeneratedKeys="true" keyProperty="id">
+
+        INSERT INTO energy set serial_num=#{serialNum},update_time=#{updateTime},update_kwh=#{updateKwh},total_kwh=#{totalKwh}
+    </insert >
+
+    <select id="queryEnergyByPage" resultType="com.wwp.entity.Energy">
+        select * from energy where serial_num = #{serialNum}
+    </select>
+
+    <select id="queryEnergyByDay" resultType="com.wwp.vo.QueryEnergyByTime">
+        select serial_num,ifnull(sum(update_kwh),0) as totalKwh from energy where DATE_FORMAT(update_time,'%Y-%m-%d') = DATE_FORMAT(#{day},'%Y-%m-%d') group by serial_num
+    </select>
+
+</mapper>

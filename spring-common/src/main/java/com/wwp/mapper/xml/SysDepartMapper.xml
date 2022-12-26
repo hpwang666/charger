@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wwp.mapper.SysDepartMapper">
+
+    <insert id="save"   parameterType="com.wwp.entity.SysDepart">
+        INSERT INTO sys_depart set id=#{id},parent_id=#{parentId},parent_prj_id=#{parentPrjId},`depart_name`=#{departName},depart_name_py=#{departNamePy},`depart_name_abbr`=#{departNameAbbr},
+                pay_code=#{payCode}, pay_channel=#{payChannel}, org_category=#{orgCategory}, org_code=#{orgCode}, memo=#{memo}, status=#{status}, del_flag=#{delFlag}
+    </insert>
+
+    <update id="update">
+        update sys_depart
+        <trim prefix="set" suffixOverrides=",">
+            <if test="parentId!=null">`parent_id`=#{parentId,jdbcType=VARCHAR},</if>
+            <if test="departName!=null">depart_name=#{departName,jdbcType=VARCHAR},</if>
+            <if test="departNamePy!=null">depart_name_py=#{departNamePy,jdbcType=VARCHAR},</if>
+            <if test="departNameAbbr!=null">depart_name_abbr=#{departNameAbbr,jdbcType=VARCHAR},</if>
+            <if test="payCode!=null">pay_code=#{payCode,jdbcType=VARCHAR},</if>
+            <if test="payChannel!=null">pay_channel=#{payChannel,jdbcType=TINYINT},</if>
+            <if test="orgCategory!=null">org_category=#{orgCategory,jdbcType=TINYINT},</if>
+            <if test="orgCode!=null">org_code=#{orgCode,jdbcType=VARCHAR},</if>
+            <if test="memo!=null">memo=#{memo,jdbcType=VARCHAR},</if>
+        </trim>
+        WHERE id =#{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="removeByIds" parameterType="java.util.List" >
+        DELETE FROM `sys_depart` WHERE `id` IN
+        <foreach collection="list" item="id"  open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="queryUserDeparts" parameterType="String" resultType="com.wwp.entity.SysDepart">
+	   select a.* from sys_depart a left join sys_user_depart b on a.id=b.depart_id where user_id = #{userId}
+    </select>
+
+    <!-- 根据username查询所拥有的部门 -->
+    <select id="queryDepartsByUsername" parameterType="map" resultType="com.wwp.entity.SysDepart">
+        SELECT *
+        FROM sys_depart
+        WHERE id IN (
+            SELECT depart_id
+            FROM sys_user_depart
+            WHERE user_id = (
+                SELECT id
+                FROM sys_user
+                WHERE username = #{username}
+            )
+        ) and del_flag != '1'
+    </select>
+
+
+
+    <select id="queryDepartsByIdList" parameterType="String"  resultType="com.wwp.entity.SysDepart">
+	   select * from sys_depart where 1=1
+        <if test="departName != null and departName != ''">
+            AND (depart_name like '%${departName}%' or depart_name_py like '%${departNamePy}%')
+        </if>
+
+        <if test="idList != null">
+            AND id in
+            <foreach item="id" collection="idList" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        AND org_category= #{orgCategory}
+        and del_flag != '1'
+	</select>
+
+    <select id="queryOneByParentIdAndName" parameterType="map"  resultType="com.wwp.entity.SysDepart">
+        select * from sys_depart where 1=1
+        <if test="parentId != null and parentId != ''">
+            AND parent_id = #{parentId}
+        </if>
+
+        <if test="departName != null and departName != ''">
+            AND depart_name = #{departName}
+        </if>
+        and del_flag != '1' limit 1
+    </select>
+
+    <select id="queryDepartsByNamePy" parameterType="String"  resultType="com.wwp.entity.SysDepart">
+        select * from sys_depart where 1=1
+        <if test="departNamePy != null and namePy != ''">
+            AND (epart_name_py like '%${departNamePy}%')
+        </if>
+        and del_flag != '1'
+    </select>
+
+</mapper>
