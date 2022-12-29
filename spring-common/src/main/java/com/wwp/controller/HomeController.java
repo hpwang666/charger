@@ -3,6 +3,7 @@ package com.wwp.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.wwp.common.constant.CommonConstant;
 import com.wwp.common.util.JwtUtil;
+import com.wwp.common.util.RedisUtil;
 import com.wwp.common.util.SaltUtils;
 import com.wwp.common.util.oConvertUtils;
 import com.wwp.config.JwtToken;
@@ -14,11 +15,14 @@ import com.wwp.sevice.ISysDepartService;
 import com.wwp.sevice.ISysRoleService;
 import com.wwp.sevice.ISysUserService;
 import com.wwp.vo.Result;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.freemarker.SpringTemplateLoader;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -38,6 +42,9 @@ public class HomeController {
 
     @Resource
     private ISysRoleService sysRoleService;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     @RequestMapping({"/", "/index"})
     public String index() {
@@ -71,30 +78,46 @@ public class HomeController {
         try {
             JwtToken jwtToken = new JwtToken(userInfo(sysUser, result));
             subject.login(jwtToken);//这个最终就是调用的doGetAuthenticationInfo
-            Session session = subject.getSession();
-            System.out.println("sessionId:" + session.getId());
-            System.out.println("sessionHost:" + session.getHost());
-            System.out.println("sessionTimeout:" + session.getTimeout());
-            session.setAttribute("info", "session 测试");
+            //Session session = subject.getSession();
+            //System.out.println("sessionId:" + session.getId());
+            //System.out.println("sessionHost:" + session.getHost());
+            //System.out.println("sessionTimeout:" + session.getTimeout());
+            //session.setAttribute("info", "session 测试");
 
-            SysUser sysUser1 = (SysUser) SecurityUtils.getSubject().getPrincipal();
+            SysUser sysUser1 = new SysUser();
+            PropertyUtils.copyProperties(sysUser1,SecurityUtils.getSubject().getPrincipal());
             System.out.println("user:  "+sysUser1.getUsername());
             return result;
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("user", loginUser);
             request.setAttribute("errorMsg", "failure");
-            return result.error500("err when login");
+            return Result.error(500,"err when login");
         }
     }
 
     @RequestMapping(value = "/logout",method= RequestMethod.GET)
     public Result<Object> logout(HttpServletRequest request, HttpServletResponse response) {
         //用户退出逻辑
-        Subject subject = SecurityUtils.getSubject();
-        subject.logout();
+        String token = request.getHeader(CommonConstant.X_ACCESS_TOKEN);
+        if(oConvertUtils.isEmpty(token)) {
+            return Result.error("退出登录失败！");
+        }
+        String username = JwtUtil.getUsername(token);
+        SysUser sysUser = sysUserService.queryUserByUsername(username);
+        if(sysUser!=null) {
+            redisUtil.del(CommonConstant.PREFIX_USER_TOKEN + username);
+            redisUtil.del("shiro:cache:authenticationCache:" + username);
+            redisUtil.del("shiro:cache:authorizationCache:" + username);
 
-        return Result.OK("退出登录OK");
+            Subject subject = SecurityUtils.getSubject();
+            subject.logout();
+
+            return Result.OK("退出登录OK");
+        }
+        else {
+            return Result.error("Token无效!");
+        }
     }
 
     @GetMapping(value = "/error")
@@ -116,12 +139,27 @@ public class HomeController {
     private String userInfo(SysUser sysUser, Result<JSONObject> result) {
         String syspassword = sysUser.getPassword();
         String username = sysUser.getUsername();
-        // 生成token
-        String token = JwtUtil.sign(username, syspassword);
-        // TODO 设置token缓存有效时间
-        //redisUtil.set(CommonConstant.PREFIX_USER_TOKEN + token, token);
-        //redisUtil.expire(CommonConstant.PREFIX_USER_TOKEN + token, JwtUtil.EXPIRE_TIME*2 / 1000);
+        Object cachedToken =  redisUtil.get(CommonConstant.PREFIX_USER_TOKEN + username);
+        String token;
+        if(oConvertUtils.isEmpty(cachedToken)){// 生成token
+            token = JwtUtil.sign(username, syspassword);
+            redisUtil.set(CommonConstant.PREFIX_USER_TOKEN + username, token);
+            redisUtil.del("shiro:cache:authenticationCache:"+username);
+            redisUtil.del("shiro:cache:authorizationCache:"+username);
+        }
 
+        else {
+            token = cachedToken.toString();
+            redisUtil.expire(CommonConstant.PREFIX_USER_TOKEN + username, JwtUtil.EXPIRE_TIME*2 / 1000);
+            redisUtil.expire("shiro:cache:authenticationCache:" + username, JwtUtil.EXPIRE_TIME / 1000);
+            redisUtil.expire("shiro:cache:authorizationCache:" + username, JwtUtil.EXPIRE_TIME / 1000);
+
+        }
+        // TODO 设置token缓存有效时间
+
+        //这里有个问题需要规避的就是  token更新后，传入认证token和cached auth信息里面包含的token会不一致而导致认证失败
+        //可以在Jwttoken里面直接getCredentials()  里面直接返回token，导致shiro:cache:authenticationCache:**** 每次都是新的
+        // 那么找不到缓存，就直接走认证了
 
         if(true){//sysUser.getType()==0
             // 获取用户部门信息

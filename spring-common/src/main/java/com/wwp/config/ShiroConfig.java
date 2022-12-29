@@ -1,17 +1,25 @@
 package com.wwp.config;
 
+import com.wwp.common.util.oConvertUtils;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
-import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
-import org.apache.shiro.mgt.DefaultSubjectDAO;
+import org.apache.shiro.mgt.*;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.session.mgt.DefaultSessionManager;
+import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
+import org.crazycake.shiro.RedisCacheManager;
+import org.crazycake.shiro.RedisManager;
+import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 
 import javax.servlet.Filter;
@@ -22,6 +30,12 @@ import java.util.Properties;
 
 @Configuration
 public class ShiroConfig {
+	@Value("${spring.redis.port}")
+	private String port;
+
+	@Value("${spring.redis.host}")
+	private String host;
+
 	@Bean
 	public ShiroFilterFactoryBean shirFilter(SecurityManager securityManager) {
 		System.out.println("ShiroConfiguration.shirFilter()");
@@ -69,7 +83,20 @@ public class ShiroConfig {
 	@Bean
 	public MyShiroRealm myShiroRealm(){
 		MyShiroRealm myShiroRealm = new MyShiroRealm();
+
 		//myShiroRealm.setCredentialsMatcher(hashedCredentialsMatcher());
+		myShiroRealm.setCachingEnabled(true);
+		// 开启身份验证缓存，即缓存AuthenticationInfo信息
+		myShiroRealm.setAuthenticationCachingEnabled(true);
+		// 设置身份缓存名称前缀
+		myShiroRealm.setAuthenticationCacheName("authenticationCache");
+		// 开启授权缓存
+		myShiroRealm.setAuthorizationCachingEnabled(true);
+		// 这是权限缓存名称前缀
+		myShiroRealm.setAuthorizationCacheName("authorizationCache");
+
+
+
 		return myShiroRealm;
 	}
 
@@ -79,16 +106,24 @@ public class ShiroConfig {
 		DefaultWebSecurityManager securityManager =  new DefaultWebSecurityManager();
 		securityManager.setRealm(myShiroRealm());
 
-/*
+
 		//关闭shiro自带的session
 		DefaultSubjectDAO subjectDAO = new DefaultSubjectDAO();
 		DefaultSessionStorageEvaluator defaultSessionStorageEvaluator = new DefaultSessionStorageEvaluator();
 		defaultSessionStorageEvaluator.setSessionStorageEnabled(false);
-	subjectDAO.setSessionStorageEvaluator(defaultSessionStorageEvaluator);
+		subjectDAO.setSessionStorageEvaluator(defaultSessionStorageEvaluator);
 		securityManager.setSubjectDAO(subjectDAO);
-*/
+
+		//禁用session
+		securityManager.setSubjectFactory(new StatelessDefaultSubjectFactory());
+
+		//自定义缓存实现,使用redis
+		securityManager.setCacheManager(redisCacheManager());
+		securityManager.setSessionManager(sessionManager());
+
 		return securityManager;
 	}
+
 
 	/**
 	 *  开启shiro aop注解支持.
@@ -103,19 +138,7 @@ public class ShiroConfig {
 		return authorizationAttributeSourceAdvisor;
 	}
 
-	@Bean(name="simpleMappingExceptionResolver")
-	public SimpleMappingExceptionResolver
-	createSimpleMappingExceptionResolver() {
-		SimpleMappingExceptionResolver r = new SimpleMappingExceptionResolver();
-		Properties mappings = new Properties();
-		mappings.setProperty("DatabaseException", "databaseError");//数据库异常处理
-		mappings.setProperty("UnauthorizedException","403");
-		r.setExceptionMappings(mappings);  // None by default
-		r.setDefaultErrorView("error");    // No default
-		r.setExceptionAttribute("ex");     // Default is "exception"
-		//r.setWarnLogCategory("example.MvcLogger");     // No default
-		return r;
-	}
+
 
 	@Bean(name = "lifecycleBeanPostProcessor")
 	public static LifecycleBeanPostProcessor getLifecycleBeanPostProcessor() {
@@ -132,4 +155,59 @@ public class ShiroConfig {
 		creator.setProxyTargetClass(true);
 		return creator;
 	}
+
+	public RedisCacheManager redisCacheManager() {
+		System.out.println("===============(1)创建缓存管理器RedisCacheManager");
+		RedisCacheManager redisCacheManager = new RedisCacheManager();
+		redisCacheManager.setRedisManager(redisManager());
+		//redis中针对不同用户缓存(此处的id需要对应user实体中的id字段,用于唯一标识)
+		redisCacheManager.setPrincipalIdFieldName("username");
+		//用户权限信息缓存时间
+		redisCacheManager.setExpire(3600);
+		return redisCacheManager;
+	}
+
+	/**
+	 * 配置shiro redisManager
+	 * 使用的是shiro-redis开源插件
+	 *
+	 * @return
+	 */
+	@Bean
+	public RedisManager redisManager() {
+		System.out.println("===============(2)创建RedisManager,连接Redis..URL= " + host + ":" + port);
+		RedisManager redisManager = new RedisManager();
+		redisManager.setHost(host);
+		redisManager.setPort(oConvertUtils.getInt(port));
+		redisManager.setTimeout(0);
+//		if (!StringUtils.isEmpty(redisPassword)) {
+//			redisManager.setPassword(redisPassword)/**/;
+//		}
+		return redisManager;
+	}
+
+	@Bean
+	public SessionManager sessionManager() {
+		//把session存入到redis  前提需要使能session的各种
+		//ShiroSessionManager sessionManager = new ShiroSessionManager();
+		//sessionManager.setSessionDAO(redisSessionDAO());
+
+		DefaultSessionManager shiroSessionManager = new DefaultSessionManager();
+		// 关闭session校验轮询
+		shiroSessionManager.setSessionValidationSchedulerEnabled(false);
+		return shiroSessionManager;
+	}
+
+	@Bean
+	public RedisSessionDAO redisSessionDAO() {
+		RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
+		redisSessionDAO.setRedisManager(redisManager());
+		// 设置缓存名前缀
+		redisSessionDAO.setKeyPrefix("shiro:session:");
+		return redisSessionDAO;
+	}
+
+
+
+
 }

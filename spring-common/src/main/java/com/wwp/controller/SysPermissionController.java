@@ -16,8 +16,10 @@ import com.wwp.sevice.ISysPermissionService;
 import com.wwp.sevice.ISysRolePermissionService;
 import com.wwp.sevice.ISysUserRoleService;
 import com.wwp.vo.Result;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.shiro.SecurityUtils;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -128,10 +130,18 @@ public class SysPermissionController {
 	 * @return
 	 */
 	//@ApiOperation("用户权限列表")
+	@RequiresPermissions("userInfo:view")
 	@RequestMapping(value = "/getUserPermission", method = RequestMethod.GET)
-	public Result<?> getUserPermissionByToken(HttpServletRequest request) {
+	public Result<?> getUserPermissionByToken(HttpServletRequest request)throws Exception {
 		Result<JSONObject> result = new Result<>();
-		SysUser sysUser = (SysUser) SecurityUtils.getSubject().getPrincipal();
+		SysUser sysUser = new SysUser();
+		try{
+
+			PropertyUtils.copyProperties(sysUser,SecurityUtils.getSubject().getPrincipal());
+		}
+		catch (Exception e){
+			throw e;
+		}
 		List<SysRole> sysRoles = sysUserRoleService.getRoleByUserName(sysUser.getUsername());//getRoleByUserName
 		List<SysPermission> permissionList;
 

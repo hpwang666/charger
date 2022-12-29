@@ -9,6 +9,7 @@ import com.wwp.entity.SysDepartTreeModel;
 import com.wwp.entity.SysUser;
 import com.wwp.sevice.ISysDepartService;
 import com.wwp.vo.Result;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.shiro.SecurityUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +44,11 @@ public class SysDepartController {
 	 */
 
 	@RequestMapping(value = "/queryTreeList", method = RequestMethod.GET)
-	public Result<List<SysDepartTreeModel>> queryTreeList() {
+	public Result<List<SysDepartTreeModel>> queryTreeList()throws Exception {
 		Result<List<SysDepartTreeModel>> result = new Result<>();
-		SysUser sysUser = (SysUser) SecurityUtils.getSubject().getPrincipal();
+		SysUser sysUser = new SysUser();
+		PropertyUtils.copyProperties(sysUser,SecurityUtils.getSubject().getPrincipal());
+
 		List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
 		SysDepart depart =  (departs == null || departs.isEmpty()) ? departs.get(0) : null;
 		try {

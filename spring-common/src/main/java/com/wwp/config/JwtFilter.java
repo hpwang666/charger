@@ -57,6 +57,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
 		getSubject(request, response).login(jwtToken);
 		// 如果没有抛出异常则代表登入成功，返回true
 		return true;
+		//return getSubject(request, response).isAuthenticated();
 	}
 	@Override
 	protected boolean onAccessDenied(ServletRequest servletRequest, ServletResponse servletResponse) throws Exception {
