@@ -144,15 +144,13 @@ public class HomeController {
         if(oConvertUtils.isEmpty(cachedToken)){// 生成token
             token = JwtUtil.sign(username, syspassword);
             redisUtil.set(CommonConstant.PREFIX_USER_TOKEN + username, token);
+            redisUtil.expire(CommonConstant.PREFIX_USER_TOKEN + username, JwtUtil.EXPIRE_TIME / 2000);
             redisUtil.del("shiro:cache:authenticationCache:"+username);
             redisUtil.del("shiro:cache:authorizationCache:"+username);
         }
 
         else {
             token = cachedToken.toString();
-            redisUtil.expire(CommonConstant.PREFIX_USER_TOKEN + username, JwtUtil.EXPIRE_TIME*2 / 1000);
-            redisUtil.expire("shiro:cache:authenticationCache:" + username, JwtUtil.EXPIRE_TIME / 1000);
-            redisUtil.expire("shiro:cache:authorizationCache:" + username, JwtUtil.EXPIRE_TIME / 1000);
 
         }
         // TODO 设置token缓存有效时间

@@ -76,15 +76,14 @@ public class MyShiroRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth)
             throws AuthenticationException {
-        System.out.println("MyShiroRealm.doGetAuthenticationInfo()");
+        System.out.println("开始认证：MyShiroRealm.doGetAuthenticationInfo()");
         //获取用户的输入的账号.
         String token = (String) auth.getCredentials();
         if(oConvertUtils.isEmpty(token)) throw new AuthenticationException("token 为空");
         String username = JwtUtil.getUsername(token);
         System.out.println("username: "+ username);
 
-        //TODO 需要判断  更新 token有效期
-        System.out.println("需要判断  更新 token有效期");
+
 
         SysUser userInfo = sysUserMapper.getUserByUsername(username);
        System.out.println("----->>userInfo.passwd="+userInfo.getPassword());
@@ -107,9 +106,9 @@ public class MyShiroRealm extends AuthorizingRealm {
 
     /**
      * JWTToken刷新生命周期 （实现： 用户在线操作不掉线功能）
-     * 1、登录成功后将用户的JWT生成的Token作为k、v存储到cache缓存里面(这时候k、v值一样)，缓存有效期设置为Jwt有效时间的2倍
-     * 2、当该用户再次请求时，通过JWTFilter层层校验之后会进入到doGetAuthenticationInfo进行身份验证
-     * 3、当该用户这次请求jwt生成的token值已经超时，但该token对应cache中的k还是存在，则表示该用户一直在操作只是JWT的token失效了，程序会给token对应的k映射的v值重新生成JWTToken并覆盖v值，该缓存生命周期重新计算
+     * 1、登录成功后将用户的JWT生成的Token作为k、v存储到cache缓存里面(这时候k、v值一样)，缓存有效期设置为Jwt有效时间的一半，这样才有机会验证token是否自己超时
+     * 2、当该用户再次请求时，通过AuthenticationInfo的redis缓存(缓存是否存在)看是否进入到doGetAuthenticationInfo进行身份验证
+     * 3、当该用户这次请求jwt生成的token值已经超时(redis里面的AuthenticationInfo肯定不在了)，但该token对应cache中的k还是存在，则表示该用户一直在操作只是JWT的token失效了，程序会给token对应的k映射的v值重新生成JWTToken并覆盖v值，该缓存生命周期重新计算
      * 4、当该用户这次请求jwt在生成的token值已经超时，并在cache中不存在对应的k，则表示该用户账户空闲超时，返回用户信息已失效，请重新登录。
      * 注意： 前端请求Header中设置Authorization保持不变，校验有效性以缓存中的token为准。
      *       用户过期时间 = Jwt有效时间 * 2。
@@ -121,18 +120,14 @@ public class MyShiroRealm extends AuthorizingRealm {
     public boolean jwtTokenRefresh(String token, String userName, String passWord) {
         String cacheToken = String.valueOf(redisUtil.get(CommonConstant.PREFIX_USER_TOKEN + userName));
         if (oConvertUtils.isNotEmpty(cacheToken)) {
-            // 校验token有效性
-            if (!JwtUtil.verify(cacheToken, userName, passWord)) {
-                return false;
-            }
-            //update-begin--Author:scott  Date:20191005  for：解决每次请求，都重写redis中 token缓存问题
-		else {
-				// 设置超时时间
-				redisUtil.expire(CommonConstant.PREFIX_USER_TOKEN + userName, JwtUtil.EXPIRE_TIME / 1000);
-			}
+            System.out.println("token 存在有效");
             return true;
         }
-        return false;
+        else{
+            System.out.println("token 没有缓存");
+            return false;
+        }
+
     }
 
     /**

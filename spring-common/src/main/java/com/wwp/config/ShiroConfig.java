@@ -163,7 +163,7 @@ public class ShiroConfig {
 		//redis中针对不同用户缓存(此处的id需要对应user实体中的id字段,用于唯一标识)
 		redisCacheManager.setPrincipalIdFieldName("username");
 		//用户权限信息缓存时间
-		redisCacheManager.setExpire(3600);
+		redisCacheManager.setExpire(7200);//只有token有效期的一半
 		return redisCacheManager;
 	}
 

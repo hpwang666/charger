@@ -70,10 +70,12 @@ public class CommonApplicationTests {
 
 	@Test
 	public void testRedis() throws Exception{
-		//redisUtil.set("1234","hello");
-		redisUtil.expire("1234", 100);
+		String token = redisUtil.get("prefix_user_token_love").toString();
+		//redisUtil.expire("1234", 100);
 
-		//System.out.println(redisUtil.get("123"));
+		System.out.println(token);
+		System.out.println(JwtUtil.verify(token, "love", "f2efaa3e834261a5ae4bac1123fba47b"));
+
 	}
 
 }
