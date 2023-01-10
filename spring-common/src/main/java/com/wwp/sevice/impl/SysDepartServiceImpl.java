@@ -42,17 +42,23 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	 * queryTreeList 对应 queryTreeList 查询所有的部门数据,以树结构形式响应给前端
 	 */
 	@Override
-	public List<SysDepartTreeModel> queryTreeList(SysDepart depart) {
-		Integer parentCategory = null;
+	public List<DepartIdModel> queryTreeList(SysDepart depart) {
+		Integer parentCategory = 4;
 		List<SysDepart> list;
+		List<SysDepart>  parentList;
 		if(depart != null) {
 			parentCategory = depart.getOrgCategory() + 1;
 			list = queryChildDepartById(depart.getId());
+			list.add(depart);
+			parentList = queryParentDepartById(depart.getId());//直线上顶层到集团
+			if(parentList.size()>0){
+				list.addAll(parentList);
+			}
 		} else {
 			list = queryAllDeparts();
 		}
 
-		List<SysDepartTreeModel> listResult = FindsDepartsChildrenUtil.wrapTreeDataToTreeList(list, parentCategory);
+		List<DepartIdModel> listResult = FindsDepartsChildrenUtil.wrapTreeDataToDepartIdTreeList(list, parentCategory);
 		return listResult;
 	}
 

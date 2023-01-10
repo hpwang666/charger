@@ -153,13 +153,12 @@ public class HomeController {
             token = cachedToken.toString();
 
         }
-        // TODO 设置token缓存有效时间
 
         //这里有个问题需要规避的就是  token更新后，传入认证token和cached auth信息里面包含的token会不一致而导致认证失败
         //可以在Jwttoken里面直接getCredentials()  里面直接返回token，导致shiro:cache:authenticationCache:**** 每次都是新的
         // 那么找不到缓存，就直接走认证了
 
-        if(true){//sysUser.getType()==0
+        if(sysUser.getType()==0){//
             // 获取用户部门信息
             JSONObject obj = new JSONObject();
             List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
@@ -170,7 +169,9 @@ public class HomeController {
             obj.put("token", token);
            // obj.put("userInfo", sysUser);
           //  obj.put("park", park);
-            obj.put("role", roles.size()>0 ? roles.get(0) : null);
+            if(roles.size()>0)
+                obj.put("roles",roles );
+            else obj.put("roles",null );
             result.setResult(obj);
         }else if(sysUser.getType()==1){
             //获取商户信息

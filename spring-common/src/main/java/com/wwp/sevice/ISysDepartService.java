@@ -20,7 +20,7 @@ public interface ISysDepartService {
      * 查询所有部门信息,并分节点进行显示
      * @return
      */
-    List<SysDepartTreeModel> queryTreeList(SysDepart depart);
+    List<DepartIdModel> queryTreeList(SysDepart depart);
 
     /**
      * 查询所有部门DepartId信息,并分节点进行显示
@@ -29,6 +29,7 @@ public interface ISysDepartService {
      List<DepartIdModel> queryDepartIdTreeList();
 
     SysDepart queryDepartById(String id);
+
     boolean updateDepart(SysDepart depart);
 
     /**

@@ -9,7 +9,7 @@
 
     <!--  将数据库生成的id 返回到SysUser中-->
     <insert id="reg"   parameterType="com.wwp.entity.SysUser">
-        INSERT INTO sys_user set id=#{id},username=#{username},password=#{password},`name`=#{name},salt=#{salt},`state`=#{state}
+        INSERT INTO sys_user set id=#{id},username=#{username},password=#{password},`name`=#{name},salt=#{salt},`state`=#{state},`type`=#{type}
     </insert>
 
     <resultMap id="BaseResultMap" type="java.util.Map">

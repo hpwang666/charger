@@ -53,7 +53,7 @@ CREATE TABLE `sys_depart` (
     `org_category` tinyint(1)  DEFAULT NULL COMMENT '机构类别 1城市，2集团，3公司，4车场',
     `org_code` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '机构编码',
     `memo` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '备注',
-    `status` tinyint(1)  NOT NULL COMMENT '状态 1启用，0不启用',
+    `state` tinyint(1)  NOT NULL COMMENT '状态 1启用，0不启用',
     `del_flag` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '删除状态 0正常，1已删除',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;

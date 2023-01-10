@@ -4,7 +4,7 @@
 
     <insert id="save"   parameterType="com.wwp.entity.SysDepart">
         INSERT INTO sys_depart set id=#{id},parent_id=#{parentId},parent_prj_id=#{parentPrjId},`depart_name`=#{departName},depart_name_py=#{departNamePy},`depart_name_abbr`=#{departNameAbbr},
-                pay_code=#{payCode}, pay_channel=#{payChannel}, org_category=#{orgCategory}, org_code=#{orgCode}, memo=#{memo}, status=#{status}, del_flag=#{delFlag}
+                pay_code=#{payCode}, pay_channel=#{payChannel}, org_category=#{orgCategory}, org_code=#{orgCode}, memo=#{memo}, state=#{state}, del_flag=#{delFlag}
     </insert>
 
     <update id="update">

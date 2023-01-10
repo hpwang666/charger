@@ -3,6 +3,7 @@ package com.wwp;
 import com.wwp.common.aspect.annotation.AutoLog;
 import com.wwp.common.util.JwtUtil;
 import com.wwp.common.util.RedisUtil;
+import com.wwp.entity.DepartIdModel;
 import com.wwp.entity.SysDepart;
 import com.wwp.entity.SysDepartTreeModel;
 import com.wwp.entity.SysUser;
@@ -61,10 +62,10 @@ public class CommonApplicationTests {
 		List<SysDepart> departs = sysDepartService.queryUserDeparts("17");
 
 		SysDepart depart =  (departs == null || departs.isEmpty()) ? null:departs.get(1);
-		List<SysDepartTreeModel> list = sysDepartService.queryTreeList(depart);
+		List<DepartIdModel> list = sysDepartService.queryTreeList(depart);
 
-		for(SysDepartTreeModel departModel:list){
-			System.out.println(departModel.getDepartName());
+		for(DepartIdModel departModel:list){
+			System.out.println(departModel.getLable());
 		}
 	}
 

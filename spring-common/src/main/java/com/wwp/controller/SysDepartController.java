@@ -44,20 +44,23 @@ public class SysDepartController {
 	 */
 
 	@RequestMapping(value = "/queryTreeList", method = RequestMethod.GET)
-	public Result<List<SysDepartTreeModel>> queryTreeList()throws Exception {
-		Result<List<SysDepartTreeModel>> result = new Result<>();
+	public Result<List<DepartIdModel>> queryTreeList()throws Exception {
+		Result<List<DepartIdModel>> result = new Result<>();
 		SysUser sysUser = new SysUser();
 		PropertyUtils.copyProperties(sysUser,SecurityUtils.getSubject().getPrincipal());
 
 		List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
-		SysDepart depart =  (departs == null || departs.isEmpty()) ? departs.get(0) : null;
+		//超级管理员是没有部门的
+		SysDepart depart =  (departs == null || departs.isEmpty()) ? null:departs.get(0);
 		try {
-			List<SysDepartTreeModel> list = sysDepartService.queryTreeList(depart);
+			List<DepartIdModel> list = sysDepartService.queryTreeList(depart);
 			result.setResult(list);
 			result.setCode(200);
 			result.setSuccess(true);
 		} catch (Exception e) {
 			result.setCode(500);
+			result.setSuccess(false);
+			result.setMessage(e.toString());
 		}
 		return result;
 	}

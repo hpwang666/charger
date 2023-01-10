@@ -41,7 +41,7 @@ public class SysDepart implements Serializable {
 
 	private String memo;//备注
 
-	private Integer status;//状态（1启用，0不启用）
+	private Integer state;//状态（1启用，0不启用）
 
 	private String delFlag;//删除状态（0，正常，1已删除）
 
@@ -138,13 +138,13 @@ public class SysDepart implements Serializable {
 	{
 		this.memo = memo;
 	}
-	public void setStatus(Integer status)
+	public void setState(Integer state)
 	{
-		this.status = status;
+		this.state = state;
 	}
-	public Integer getStatus()
+	public Integer getState()
 	{
-		return this.status;
+		return this.state;
 	}
 	public void setDelFlag(String delFlag)
 	{
@@ -178,7 +178,7 @@ public class SysDepart implements Serializable {
                 Objects.equals(orgCategory, depart.orgCategory) &&
                 Objects.equals(orgCode, depart.orgCode) &&
                 Objects.equals(memo, depart.memo) &&
-                Objects.equals(status, depart.status) ;
+                Objects.equals(state, depart.state) ;
     }
 
     /**
@@ -188,6 +188,6 @@ public class SysDepart implements Serializable {
     public int hashCode() {
 
         return Objects.hash(super.hashCode(), id, parentId, departName, 
-        		departNameAbbr, orgCategory, orgCode, memo, status);
+        		departNameAbbr, orgCategory, orgCode, memo, state);
     }
 }

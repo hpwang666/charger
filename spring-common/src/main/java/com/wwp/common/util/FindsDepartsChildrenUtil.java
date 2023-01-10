@@ -5,6 +5,7 @@ package com.wwp.common.util;
 import com.wwp.entity.DepartIdModel;
 import com.wwp.entity.SysDepart;
 import com.wwp.entity.SysDepartTreeModel;
+import com.wwp.entity.SysUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,8 @@ public class FindsDepartsChildrenUtil {
             records.add(new SysDepartTreeModel(depart));
         }
         List<SysDepartTreeModel> tree = findChildren(records, idList, parentCategory);
-        setEmptyChildrenAsNull(tree);
+
+       // setEmptyChildrenAsNull(tree);
         return tree;
     }
 
@@ -54,11 +56,16 @@ public class FindsDepartsChildrenUtil {
         //idList.clear();
         List<DepartIdModel> idList = new ArrayList<>();
         List<SysDepartTreeModel> records = new ArrayList<>();
+
+
         for (int i = 0; i < recordList.size(); i++) {
             SysDepart depart = recordList.get(i);
             records.add(new SysDepartTreeModel(depart));
         }
         findChildren(records, idList, parentCategory);
+        setEmptyChildrenAsNull(idList);
+
+
         return idList;
     }
 
@@ -70,24 +77,26 @@ public class FindsDepartsChildrenUtil {
              List<DepartIdModel> departIdList, Integer parentCategory) {
 
         List<SysDepartTreeModel> treeList = new ArrayList<>();
+        List<SysDepartTreeModel> userAndParentList = new ArrayList<>();//自己以及父部门
+
         for (int i = 0; i < recordList.size(); i++) {
             SysDepartTreeModel branch = recordList.get(i);
-            if((parentCategory == null && oConvertUtils.isEmpty(branch.getParentId()))
-                || branch.getOrgCategory().equals(parentCategory)){//只找下一级儿子
+            if( branch.getOrgCategory().equals(1)){//只找下一级儿子 parentCategory 改成1 后就是顶层集团
+                System.out.println("城市 "+branch.getDepartName());
                 treeList.add(branch);
                 DepartIdModel departIdModel = new DepartIdModel().convert(branch);
                 departIdList.add(departIdModel);
             }
         }
+
         getGrandChildren(treeList,recordList,departIdList);
-        
-        //idList = departIdList;
+
         return treeList;
     }
 
     /**
      * queryTreeList的子方法====3====
-     *该方法是找到顶级父类下的所有子节点集合并封装到TreeList集合
+     *该方法是找到父类下的所有子节点集合并封装到TreeList集合
      */
     private static void getGrandChildren(List<SysDepartTreeModel> treeList,List<SysDepartTreeModel> recordList,List<DepartIdModel> idList) {
 
@@ -112,16 +121,14 @@ public class FindsDepartsChildrenUtil {
      * queryTreeList的子方法 ====4====
      * 该方法是将子节点为空的List集合设置为Null值
      */
-    private static void setEmptyChildrenAsNull(List<SysDepartTreeModel> treeList) {
+    private static void setEmptyChildrenAsNull(List<DepartIdModel> treeList) {
 
         for (int i = 0; i < treeList.size(); i++) {
-            SysDepartTreeModel model = treeList.get(i);
+            DepartIdModel model = treeList.get(i);
             if (model.getChildren().size() == 0) {
                 model.setChildren(null);
-                model.setLeaf(true);
             }else{
                 setEmptyChildrenAsNull(model.getChildren());
-                model.setLeaf(false);
             }
         }
         // sysDepartTreeList = treeList;

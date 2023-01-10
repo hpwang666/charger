@@ -24,7 +24,7 @@ public class DepartIdModel implements Serializable {
     private String value;
 
     // 部门名称
-    private String title;
+    private String lable;
     
     List<DepartIdModel> children = new ArrayList<>();
     
@@ -35,8 +35,8 @@ public class DepartIdModel implements Serializable {
      */
     public DepartIdModel convert(SysDepartTreeModel treeModel) {
         this.key = treeModel.getId();
-        this.value = treeModel.getId();
-        this.title = treeModel.getDepartName();
+        this.value = treeModel.getDepartName();
+        this.lable = treeModel.getDepartName();
         return this;
     }
     
@@ -47,8 +47,8 @@ public class DepartIdModel implements Serializable {
      */
     public DepartIdModel convertByUserDepart(SysDepart sysDepart) {
         this.key = sysDepart.getId();
-        this.value = sysDepart.getId();
-        this.title = sysDepart.getDepartName();
+        this.value = sysDepart.getDepartName();
+        this.lable = sysDepart.getDepartName();
         return this;
     } 
 
@@ -80,11 +80,11 @@ public class DepartIdModel implements Serializable {
         this.value = value;
     }
 
-    public String getTitle() {
-        return title;
+    public String getLable() {
+        return lable;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setLable(String title) {
+        this.lable = title;
     }
 }

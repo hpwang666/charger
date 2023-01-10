@@ -20,8 +20,7 @@ public class SysUser implements Serializable {
 
 
     private Integer type;//用户类型--0 商户--1 车主--2
-    private String depId;//部门id
-    private String departName;
+
 
     public String getId() {
         return id;
@@ -60,22 +59,7 @@ public class SysUser implements Serializable {
         this.state = state;
     }
 
-    public void setDepId(String depId)
-    {
-        this.depId = depId;
-    }
-    public String getDepId()
-    {
-        return this.depId;
-    }
-    public void setDepartName(String departName)
-    {
-        this.departName = departName;
-    }
-    public String getDepartName()
-    {
-        return this.departName;
-    }
+
     public void setType(Integer type)
     {
         this.type = type;

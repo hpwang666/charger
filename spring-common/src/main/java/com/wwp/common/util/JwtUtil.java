@@ -21,8 +21,8 @@ import java.util.Date;
  **/
 public class JwtUtil {
 
-	// Token过期时间2小时（用户登录过期时间是此时间的两倍，以token在reids缓存时间为准）
-	public static final long EXPIRE_TIME = 4 * 60 * 60 * 1000;
+	// Token过期时间24小时（用户登录过期时间是此时间的两倍，以token在reids缓存时间为准）
+	public static final long EXPIRE_TIME = 24 * 60 * 60 * 1000;
 
 	/**
 	 * 校验token是否正确

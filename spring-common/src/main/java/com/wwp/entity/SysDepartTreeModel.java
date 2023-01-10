@@ -44,7 +44,7 @@ public class SysDepartTreeModel implements Serializable{
 
     private String memo;
 
-    private Integer status;
+    private Integer state;
 
     private List<SysDepartTreeModel> children = new ArrayList<>();
 
@@ -139,11 +139,11 @@ public class SysDepartTreeModel implements Serializable{
     }
     public void setStatus(Integer status)
     {
-        this.status = status;
+        this.state = status;
     }
     public Integer getStatus()
     {
-        return this.status;
+        return this.state;
     }
     public void setChildren(List<SysDepartTreeModel> children)
     {
@@ -169,7 +169,7 @@ public class SysDepartTreeModel implements Serializable{
         this.orgCategory = sysDepart.getOrgCategory();
         this.orgCode = sysDepart.getOrgCode();
         this.memo = sysDepart.getMemo();
-        this.status = sysDepart.getStatus();
+        this.state = sysDepart.getState();
 
     }
 
@@ -194,7 +194,7 @@ public class SysDepartTreeModel implements Serializable{
                 Objects.equals(orgCategory, model.orgCategory) &&
                 Objects.equals(orgCode, model.orgCode) &&
                 Objects.equals(memo, model.memo) &&
-                Objects.equals(status, model.status) &&
+                Objects.equals(state, model.state) &&
                 Objects.equals(children, model.children);
     }
     
@@ -205,7 +205,7 @@ public class SysDepartTreeModel implements Serializable{
     public int hashCode() {
 
         return Objects.hash(id, parentId, departName, departNameAbbr,
-        		orgCategory, orgCode, memo, status, children);
+        		orgCategory, orgCode, memo, state, children);
     }
 
 }
