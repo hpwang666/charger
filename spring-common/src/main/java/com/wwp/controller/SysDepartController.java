@@ -50,10 +50,10 @@ public class SysDepartController {
 		PropertyUtils.copyProperties(sysUser,SecurityUtils.getSubject().getPrincipal());
 
 		List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
-		//超级管理员是没有部门的
+		//超级管理员是没有部门的 为null
 		SysDepart depart =  (departs == null || departs.isEmpty()) ? null:departs.get(0);
 		try {
-			List<DepartIdModel> list = sysDepartService.queryTreeList(depart);
+			List<DepartIdModel> list = sysDepartService.queryUserDepartIdList(depart);
 			result.setResult(list);
 			result.setCode(200);
 			result.setSuccess(true);
@@ -71,31 +71,31 @@ public class SysDepartController {
 	 * @return
 	 */
 
-	@RequestMapping(value = "/add", method = RequestMethod.POST)
+	@RequestMapping(value = "/addDepart", method = RequestMethod.POST)
 	public Result<?> add(@RequestBody SysDepart sysDepart, HttpServletRequest request) {
 		if(oConvertUtils.isEmpty(sysDepart.getDepartName())) {
 			return Result.error("请传参数：departName");
 		}
 
-		if(sysDepart.getOrgCategory() == CommonConstant.DEPART_TYPE_PROJ && oConvertUtils.isEmpty(sysDepart.getPayCode())) {
-			return Result.error("请输入参数:payCode");
+		if(oConvertUtils.isEmpty(sysDepart.getOrgCategory()))  {
+			return Result.error("请输入参数:orgCategory");
+		}
+
+		if(oConvertUtils.isEmpty(sysDepart.getParentId()) && (sysDepart.getOrgCategory()!=1))  {
+			return Result.error("非城市顶级部门必须有父级部门");
 		}
 		SysDepart existDepart = sysDepartService.queryOneByParentIdAndName(sysDepart.getParentId(), sysDepart.getDepartName());
 		if(existDepart != null) return Result.error(sysDepart.getDepartName() + "已存在");
-		String parentProjId = sysDepart.getParentPrjId();
-		if(!oConvertUtils.isEmpty(parentProjId)) {
-			//查询此项目是否存在
-			SysDepart parentProj= sysDepartService.queryDepartById(parentProjId);
-			if(parentProj==null||parentProj.getOrgCategory()!=CommonConstant.DEPART_TYPE_PROJ) return Result.error("大车场不存在");
-		}
+
 		Result<SysDepart> result = Result.OK();
 		//String username = JwtUtil.getUserNameByToken(request);
 		String departNamePy = PinyinUtils.getPinYinHeadChar(sysDepart.getDepartName());
 		sysDepart.setDepartNamePy(departNamePy);
 		try {
 			sysDepart.setDelFlag("0");
+			sysDepart.setState(1);
 			//sysDepart.setCreateBy(username);
-			sysDepartService.saveDepartData(sysDepart, null);
+			sysDepartService.saveDepartData(sysDepart);
 			result.success200("添加成功！");
 		} catch (Exception e) {
 			result.error500("操作失败");
@@ -364,7 +364,7 @@ public class SysDepartController {
 //		}
 		Result<List<DepartIdModel>> result = new Result<>();
 		try {
-			List<DepartIdModel> list = sysDepartService.queryDepartIdTreeList();
+			List<DepartIdModel> list = sysDepartService.queryAllDepartIdList();
 			result.setResult(list);
 			result.setSuccess(true);
 		} catch (Exception e) {

@@ -29,7 +29,8 @@ public class FindsDepartsChildrenUtil {
 
     /**
      * queryTreeList的子方法 ====1=====
-     * 该方法是s将SysDepart类型的list集合转换成SysDepartTreeModel类型的集合
+     * 这里返回的是 parentCategory 及其子子孙孙所有节点，如果parentCategory =1 那就是全部节点
+     * 但都是从recordList  里面筛选出来的
      */
     public static List<SysDepartTreeModel> wrapTreeDataToTreeList(List<SysDepart> recordList, Integer parentCategory) {
         // 在该方法每请求一次,都要对全局list集合进行一次清理
@@ -49,7 +50,8 @@ public class FindsDepartsChildrenUtil {
     /**
      * 获取 DepartIdModel
      * @param recordList
-     * @return
+     * @return 这里返回的是 parentCategory 及其子子孙孙所有节点，如果parentCategory =1 那就是全部节点
+     * 但都是从recordList  里面筛选出来的
      */
     public static List<DepartIdModel> wrapTreeDataToDepartIdTreeList(List<SysDepart> recordList, int parentCategory) {
         // 在该方法每请求一次,都要对全局list集合进行一次清理
@@ -57,14 +59,12 @@ public class FindsDepartsChildrenUtil {
         List<DepartIdModel> idList = new ArrayList<>();
         List<SysDepartTreeModel> records = new ArrayList<>();
 
-
         for (int i = 0; i < recordList.size(); i++) {
             SysDepart depart = recordList.get(i);
             records.add(new SysDepartTreeModel(depart));
         }
         findChildren(records, idList, parentCategory);
         setEmptyChildrenAsNull(idList);
-
 
         return idList;
     }
@@ -77,11 +77,10 @@ public class FindsDepartsChildrenUtil {
              List<DepartIdModel> departIdList, Integer parentCategory) {
 
         List<SysDepartTreeModel> treeList = new ArrayList<>();
-        List<SysDepartTreeModel> userAndParentList = new ArrayList<>();//自己以及父部门
 
         for (int i = 0; i < recordList.size(); i++) {
             SysDepartTreeModel branch = recordList.get(i);
-            if( branch.getOrgCategory().equals(1)){//只找下一级儿子 parentCategory 改成1 后就是顶层集团
+            if( branch.getOrgCategory().equals(parentCategory)){//只找下一级儿子 parentCategory 是1 后就是顶层集团
                 System.out.println("城市 "+branch.getDepartName());
                 treeList.add(branch);
                 DepartIdModel departIdModel = new DepartIdModel().convert(branch);

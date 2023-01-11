@@ -5,26 +5,20 @@ import com.wwp.common.util.JwtUtil;
 import com.wwp.common.util.RedisUtil;
 import com.wwp.entity.DepartIdModel;
 import com.wwp.entity.SysDepart;
-import com.wwp.entity.SysDepartTreeModel;
 import com.wwp.entity.SysUser;
 import com.wwp.mapper.SysPermissionMapper;
 import com.wwp.mapper.SysUserMapper;
-import com.wwp.mapper.SysUserRoleMapper;
-import com.wwp.model.TreeModel;
 import com.wwp.sevice.ISysDepartService;
-import com.wwp.sevice.ISysPermissionService;
 import com.wwp.sevice.ISysUserRoleService;
 import com.wwp.sevice.impl.SysLogService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 @ComponentScan(basePackages={"com.wwp.common.aspect.annotation"})
@@ -62,7 +56,7 @@ public class CommonApplicationTests {
 		List<SysDepart> departs = sysDepartService.queryUserDeparts("17");
 
 		SysDepart depart =  (departs == null || departs.isEmpty()) ? null:departs.get(1);
-		List<DepartIdModel> list = sysDepartService.queryTreeList(depart);
+		List<DepartIdModel> list = sysDepartService.queryUserDepartIdList(depart);
 
 		for(DepartIdModel departModel:list){
 			System.out.println(departModel.getLable());

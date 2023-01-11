@@ -25,6 +25,8 @@ public class DepartIdModel implements Serializable {
 
     // 部门名称
     private String lable;
+
+    private Integer orgCategory;
     
     List<DepartIdModel> children = new ArrayList<>();
     
@@ -37,6 +39,7 @@ public class DepartIdModel implements Serializable {
         this.key = treeModel.getId();
         this.value = treeModel.getDepartName();
         this.lable = treeModel.getDepartName();
+        this.orgCategory = treeModel.getOrgCategory();
         return this;
     }
     
@@ -49,6 +52,7 @@ public class DepartIdModel implements Serializable {
         this.key = sysDepart.getId();
         this.value = sysDepart.getDepartName();
         this.lable = sysDepart.getDepartName();
+        this.orgCategory = sysDepart.getOrgCategory();
         return this;
     } 
 
@@ -86,5 +90,12 @@ public class DepartIdModel implements Serializable {
 
     public void setLable(String title) {
         this.lable = title;
+    }
+
+    public Integer getOrgCategory() {
+        return orgCategory;
+    }
+    public void setOrgCategory(Integer orgCategory) {
+        this.orgCategory = orgCategory;
     }
 }

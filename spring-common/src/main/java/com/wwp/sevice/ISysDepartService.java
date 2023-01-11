@@ -20,13 +20,13 @@ public interface ISysDepartService {
      * 查询所有部门信息,并分节点进行显示
      * @return
      */
-    List<DepartIdModel> queryTreeList(SysDepart depart);
+    List<DepartIdModel> queryUserDepartIdList(SysDepart depart);
 
     /**
      * 查询所有部门DepartId信息,并分节点进行显示
      * @return
      */
-     List<DepartIdModel> queryDepartIdTreeList();
+     List<DepartIdModel> queryAllDepartIdList();
 
     SysDepart queryDepartById(String id);
 
@@ -36,7 +36,7 @@ public interface ISysDepartService {
      * 保存部门数据
      * @param sysDepart
      */
-    void saveDepartData(SysDepart sysDepart, String username);
+    void saveDepartData(SysDepart sysDepart);
 
     /**
      * 删除depart数据

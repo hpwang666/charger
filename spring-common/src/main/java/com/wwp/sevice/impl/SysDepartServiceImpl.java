@@ -42,14 +42,14 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	 * queryTreeList 对应 queryTreeList 查询所有的部门数据,以树结构形式响应给前端
 	 */
 	@Override
-	public List<DepartIdModel> queryTreeList(SysDepart depart) {
-		Integer parentCategory = 4;
+	public List<DepartIdModel> queryUserDepartIdList(SysDepart depart) {
+		Integer parentCategory = 1;
 		List<SysDepart> list;
 		List<SysDepart>  parentList;
 		if(depart != null) {
-			parentCategory = depart.getOrgCategory() + 1;
+			parentCategory =  1;
 			list = queryChildDepartById(depart.getId());
-			list.add(depart);
+			list.add(depart);//加入自己的部门
 			parentList = queryParentDepartById(depart.getId());//直线上顶层到集团
 			if(parentList.size()>0){
 				list.addAll(parentList);
@@ -63,7 +63,7 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	}
 
 	@Override
-	public List<DepartIdModel> queryDepartIdTreeList() {
+	public List<DepartIdModel> queryAllDepartIdList() {
 		List<SysDepart> list = queryAllDeparts();
 		// 调用wrapTreeDataToTreeList方法生成树状数据
 		List<DepartIdModel> listResult = FindsDepartsChildrenUtil.wrapTreeDataToDepartIdTreeList(list, 1);
@@ -85,20 +85,20 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	 */
 	@Override
 	@Transactional
-	public void saveDepartData(SysDepart sysDepart, String username) {
-		if (sysDepart != null && username != null) {
-			if (sysDepart.getParentId() == null) {
-				sysDepart.setParentId("");
-			}
+	public void saveDepartData(SysDepart sysDepart) {
 
-
-			if(sysDepart.getPayChannel() == null) {
-				sysDepart.setPayChannel(0);
-			}
-			//生成支付编码
-//			sysDepart.setPayCode(createPayCode(sysDepart.getPayChannel()));
-			sysDepartMapper.save(sysDepart);
+		if (sysDepart.getParentId() == null) {
+			sysDepart.setParentId("");
 		}
+
+
+		if(sysDepart.getPayChannel() == null) {
+			sysDepart.setPayChannel(0);
+		}
+		//生成支付编码
+//			sysDepart.setPayCode(createPayCode(sysDepart.getPayChannel()));
+		sysDepartMapper.save(sysDepart);
+
 
 	}
 
@@ -127,7 +127,8 @@ public class SysDepartServiceImpl implements ISysDepartService {
 
 	}
 
-    @Override
+    //自己的子子孙孙部门   不包含自己
+	@Override
     public List<SysDepart> queryChildDepartById(String id) {
 
 		List<SysDepart> list = new ArrayList<SysDepart>();
@@ -166,7 +167,8 @@ public class SysDepartServiceImpl implements ISysDepartService {
 		return sysDepartMapper.queryAllDeparts();
 	}
 
-    @Override
+    //包含本部门的父爷ID 单线上最顶层，不包含自己
+	@Override
     public List<SysDepart> queryParentDepartById(String id) {
 		List<SysDepart> list = new ArrayList<SysDepart>();
 		SysDepart depart = sysDepartMapper.queryDepartById(id);
@@ -250,7 +252,6 @@ public class SysDepartServiceImpl implements ISysDepartService {
 		map.put("idList",idList);
 		return sysDepartMapper.queryDepartsByIdList(map);
 	}
-
 
 	/**
 	 * delete 方法调用

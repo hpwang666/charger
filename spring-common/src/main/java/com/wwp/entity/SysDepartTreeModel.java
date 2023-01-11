@@ -25,7 +25,7 @@ public class SysDepartTreeModel implements Serializable{
     private String value;
 
     /** 对应depart_name字段,前端数据树中的title*/
-    private String title;
+    private String lable;
 
     private boolean isLeaf;
     // 以下所有字段均与SysDepart相同
@@ -65,13 +65,13 @@ public class SysDepartTreeModel implements Serializable{
     {
         return this.value;
     }
-    public void setTitle(String title)
+    public void setLable(String title)
     {
-        this.title = title;
+        this.lable = title;
     }
-    public String getTitle()
+    public String getLable()
     {
-        return this.title;
+        return this.lable;
     }
     public void setLeaf(boolean isLeaf)
     {
@@ -161,7 +161,7 @@ public class SysDepartTreeModel implements Serializable{
 	public SysDepartTreeModel(SysDepart sysDepart) {
 		this.key = sysDepart.getId();
         this.value = sysDepart.getId();
-        this.title = sysDepart.getDepartName();
+        this.lable = sysDepart.getDepartName();
         this.id = sysDepart.getId();
         this.parentId = sysDepart.getParentId();
         this.departName = sysDepart.getDepartName();
