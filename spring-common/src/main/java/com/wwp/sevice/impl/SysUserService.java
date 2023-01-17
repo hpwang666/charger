@@ -1,5 +1,7 @@
 package com.wwp.sevice.impl;
 
+import com.wwp.entity.SysRole;
+import com.wwp.entity.SysUserDepart;
 import com.wwp.mapper.*;
 import com.wwp.sevice.ISysUserService;
 import com.wwp.common.exception.CustomException;
@@ -7,8 +9,10 @@ import com.wwp.common.util.oConvertUtils;
 import com.wwp.entity.SysDepart;
 import com.wwp.entity.SysUser;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,26 +36,34 @@ public class SysUserService implements ISysUserService {
     SysDepartMapper sysDepartMapper;
 
     @Override
-    public void saveUser(SysUser user, String selectedRoles,String selectedDeparts) {
+    @Transactional(rollbackFor = Exception.class)
+    public void saveUser(SysUser user, String depId) {
         //step.1 保存用户
         sysUserMapper.reg(user);
-        //step.2 保存角色
 
-        String[] arr = selectedRoles.split(",");
-        for (String role : arr) {
-            sysUserRoleMapper.insert(UUID.randomUUID().toString().replaceAll("-", ""),user.getId(),sysRoleMapper.getRoleIdByRole(role));
-        }
+        String[] roles = {"city","group","com","prj"};
 
-        //step.3 保存所属部门
+        System.out.println("生成的"+ user.getId());
 
-        if(oConvertUtils.isNotEmpty(selectedDeparts)) {
-            arr = selectedDeparts.split(",");
-            for (String deaprtId : arr) {
-                SysDepart depart = sysDepartMapper.queryDepartById(deaprtId);
-                if(depart == null) throw new CustomException("没找到机构");
-                sysUserDepartMapper.save(user.getId(), deaprtId);
+        //step.2 保存所属部门
+        if(!oConvertUtils.isEmpty(depId)){
+            SysDepart depart = sysDepartMapper.queryDepartById(depId);
+            if(oConvertUtils.isEmpty(depart)) throw new CustomException("没找到机构");
+            Integer orgCategory =depart.getOrgCategory()+1;//可管理的部门层级
+
+            //添加角色
+            for(int i=orgCategory;i<5;i++){
+                String roleId =sysRoleMapper.getRoleIdByRole(roles[i-1]);
+                if(oConvertUtils.isEmpty(roleId)) throw new CustomException("未找到role："+roles[i-1]);
+                sysUserRoleMapper.insert(UUID.randomUUID().toString().replaceAll("-", ""),user.getId(),roleId);
             }
+
+            SysUserDepart sysUserDepart = new SysUserDepart(user.getId(),depId );
+
+            sysUserDepartMapper.save(sysUserDepart);
         }
+
+
     }
 
     @Override
@@ -72,8 +84,8 @@ public class SysUserService implements ISysUserService {
     }
 
     @Override
-    public  SysUser queryUserByUsername(String username)
+    public  SysUser queryUserByAccount(String account)
     {
-        return  sysUserMapper.getUserByUsername(username);
+        return  sysUserMapper.getUserByAccount(account);
     }
 }

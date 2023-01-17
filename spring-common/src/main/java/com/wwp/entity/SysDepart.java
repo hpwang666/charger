@@ -1,5 +1,6 @@
 package com.wwp.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wwp.common.aspect.annotation.Id;
 
 import java.io.Serializable;
@@ -27,8 +28,10 @@ public class SysDepart implements Serializable {
 
 	private String departName;//机构/部门名称
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String departNamePy;//机构名称拼音
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String departNameAbbr;//机构简称
 
 	private String payCode;//支付机构对于的编码
@@ -37,12 +40,15 @@ public class SysDepart implements Serializable {
 
 	private Integer orgCategory;//机构类别，1城市，2集团，3公司，4车场
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String orgCode;//机构编码
 
 	private String memo;//备注
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Integer state;//状态（1启用，0不启用）
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String delFlag;//删除状态（0，正常，1已删除）
 
 

@@ -11,12 +11,15 @@ import com.wwp.mapper.SysUserMapper;
 import com.wwp.sevice.ISysDepartService;
 import com.wwp.sevice.ISysUserRoleService;
 import com.wwp.sevice.impl.SysLogService;
+import com.wwp.sevice.impl.SysUserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -24,13 +27,15 @@ import java.util.List;
 @ComponentScan(basePackages={"com.wwp.common.aspect.annotation"})
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes= CommonApplication.class)
+@Rollback(value=false)
+@Transactional(transactionManager="transactionManager")
 public class CommonApplicationTests {
 
 	@Autowired
 	private ISysUserRoleService sysUserRoleService;
 
 	@Autowired
-	private SysUserMapper sysUserMapper;
+	private SysUserService sysUserService;
 
 	@Autowired
 	private ISysDepartService sysDepartService;
@@ -41,15 +46,10 @@ public class CommonApplicationTests {
 	@Autowired
 	private SysPermissionMapper sysPermissionMapper;
 
-	@Autowired
-	private RedisUtil redisUtil;
+	@Resource
+	private RedisUtil  redisUtil;
 
-	@AutoLog(value = "jojo")
-	public void contextLoads() throws Exception {
 
-		SysUser s = sysUserMapper.getUserByUsername("admin");
-		List<SysUser> list = sysUserMapper.list();
-	}
 
 
 	public void getDeparts() throws Exception{
@@ -59,18 +59,23 @@ public class CommonApplicationTests {
 		List<DepartIdModel> list = sysDepartService.queryUserDepartIdList(depart);
 
 		for(DepartIdModel departModel:list){
-			System.out.println(departModel.getLable());
+			System.out.println(departModel.getLabel());
 		}
 	}
 
-	@Test
+
 	public void testRedis() throws Exception{
-		String token = redisUtil.get("prefix_user_token_love").toString();
+
+
+		String token = redisUtil.get("prefix_user_token_admin").toString();
 		//redisUtil.expire("1234", 100);
 
 		System.out.println(token);
-		System.out.println(JwtUtil.verify(token, "love", "f2efaa3e834261a5ae4bac1123fba47b"));
+		//System.out.println(JwtUtil.verify(token, "love", "f2efaa3e834261a5ae4bac1123fba47b"));
 
 	}
+
+
+
 
 }

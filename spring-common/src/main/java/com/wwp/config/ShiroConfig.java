@@ -50,11 +50,13 @@ public class ShiroConfig {
 		filterChainDefinitionMap.put("/dev/regionDev", "authc");
 		filterChainDefinitionMap.put("/dev/**", "anon");
 
-		Map<String, Filter> filterMap = new HashMap<String, Filter>(1);
+		Map<String, Filter> filterMap = new HashMap<String, Filter>(2);
 		filterMap.put("jwt", new JwtFilter());
 		shiroFilterFactoryBean.setFilters(filterMap);
 
+
 		filterChainDefinitionMap.put("/**", "jwt");
+		//filterChainDefinitionMap.put("/**", "resrc");
 
 		//配置退出 过滤器,其中的具体的退出代码Shiro已经替我们实现了
 		//<!-- 过滤链定义，从上向下顺序执行，一般将/**放在最为下边 -->:这是一个坑呢，一不小心代码就不好使了;

@@ -3,21 +3,21 @@
 <mapper namespace="com.wwp.mapper.SysUserMapper">
 
     <!-- 根据用户名查询 -->
-    <select id="getUserByUsername" resultType="com.wwp.entity.SysUser">
-		select * from  sys_user  where username = #{username}
+    <select id="getUserByAccount" resultType="com.wwp.entity.SysUser">
+		select * from  sys_user  where account = #{account}
 	</select>
 
     <!--  将数据库生成的id 返回到SysUser中-->
     <insert id="reg"   parameterType="com.wwp.entity.SysUser">
-        INSERT INTO sys_user set id=#{id},username=#{username},password=#{password},`name`=#{name},salt=#{salt},`state`=#{state},`type`=#{type}
+        INSERT INTO sys_user set id=#{id},account=#{account},password=#{password},`name`=#{name},salt=#{salt},`state`=#{state},`type`=#{type}
     </insert>
 
     <resultMap id="BaseResultMap" type="java.util.Map">
-        <result column="username" property="username"/>
+        <result column="account" property="account"/>
         <result column="name" property="name"/>
     </resultMap>
     <select id="queryAllUsers" resultMap="BaseResultMap">
-		select name username from  sys_user
+		select name account from  sys_user
 	</select>
 
     <select id ="queryUserIdByDepId" resultType ="java.util.List">

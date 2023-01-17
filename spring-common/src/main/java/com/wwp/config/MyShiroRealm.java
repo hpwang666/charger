@@ -1,7 +1,6 @@
 package com.wwp.config;
 
 import com.wwp.common.constant.CommonConstant;
-import com.wwp.common.exception.CustomException;
 import com.wwp.common.util.JwtUtil;
 import com.wwp.common.util.RedisUtil;
 import com.wwp.common.util.oConvertUtils;
@@ -21,7 +20,6 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
@@ -61,10 +59,10 @@ public class MyShiroRealm extends AuthorizingRealm {
             e.printStackTrace();
         }
 
-        for(SysRole role: sysUserRoleMapper.getRoleByUserName(sysUser.getUsername())){
+        for(SysRole role: sysUserRoleMapper.getRoleByUserName(sysUser.getAccount())){
             authorizationInfo.addRole(role.getRole());
             System.out.println("role: "+role.getRole());
-            for(SysPermission p: sysPermissionMapper.queryByUser(sysUser.getUsername())){
+            for(SysPermission p: sysPermissionMapper.queryByUser(sysUser.getAccount())){
                 System.out.println("permission: "+p.getPermission());
                 authorizationInfo.addStringPermission(p.getPermission());
             }
@@ -85,7 +83,7 @@ public class MyShiroRealm extends AuthorizingRealm {
 
 
 
-        SysUser userInfo = sysUserMapper.getUserByUsername(username);
+        SysUser userInfo = sysUserMapper.getUserByAccount(username);
        System.out.println("----->>userInfo.passwd="+userInfo.getPassword());
         if(userInfo == null){
             throw new AuthenticationException("用户不存在!");

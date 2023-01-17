@@ -2,10 +2,12 @@ package com.wwp.common.aspect;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.PropertyFilter;
+import com.wwp.common.exception.CustomException;
 import com.wwp.entity.SysLog;
 import com.wwp.entity.SysUser;
 import com.wwp.sevice.ISysLogService;
 import com.wwp.common.util.SpringContextUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.shiro.SecurityUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -97,10 +99,16 @@ public class AutoLogAspect {
         System.out.println("log  url: "+ request.getRequestURI());
         sysLog.setRequestUrl(request.getRequestURI());
         //获取登录用户信息
-        SysUser sysUser = (SysUser) SecurityUtils.getSubject().getPrincipal();
+        SysUser sysUser = new SysUser();
+        try{
+            PropertyUtils.copyProperties(sysUser, SecurityUtils.getSubject().getPrincipal());
+        }
+        catch (Exception e){
+            throw new CustomException("obj拷贝错误");
+        }
         if(sysUser!=null){
 
-            sysLog.setUsername(sysUser.getUsername());
+            sysLog.setUsername(sysUser.getAccount());
 
         }
         //耗时

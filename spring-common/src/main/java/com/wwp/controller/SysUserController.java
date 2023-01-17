@@ -4,28 +4,38 @@ import com.wwp.common.aspect.annotation.AutoLog;
 import com.wwp.common.exception.CustomException;
 import com.wwp.common.util.SaltUtils;
 import com.wwp.common.util.oConvertUtils;
+import com.wwp.entity.SysDepart;
+import com.wwp.entity.SysRole;
 import com.wwp.entity.SysUser;
+import com.wwp.sevice.ISysDepartService;
+import com.wwp.sevice.ISysRoleService;
 import com.wwp.sevice.ISysUserService;
 import com.wwp.vo.Result;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.crypto.hash.SimpleHash;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/sys")
+@RequestMapping("/sys/user")
 public class SysUserController {
 
     @Resource
     private ISysUserService sysUserService;
+
+    @Resource
+    private ISysDepartService sysDepartService;
+
+    @Resource
+    private ISysRoleService sysRoleService;
+
     /**
      * 用户查询.
      * @return
@@ -51,30 +61,46 @@ public class SysUserController {
     //@RequiresRoles({"admin"})
     //@RequiresPermissions("user:add")
     @AutoLog(value = "注册账户",logType = 2)
-    @RequestMapping(value = "/userAdd", method = RequestMethod.POST)
-    public Result<SysUser> userAdd(@RequestBody JSONObject jsonObject) throws Exception{
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public Result<?> userAdd(@RequestBody JSONObject jsonObject,@RequestParam(name="depId") String depId) throws Exception{
         Result<SysUser> result = new Result<SysUser>();
-        String selectedRoles = jsonObject.getString("selectedRoles");
-        if(oConvertUtils.isEmpty(selectedRoles)) throw new CustomException("No Roles selected");
-        String selectedDeparts = jsonObject.getString("selecteddeparts");
-        if(oConvertUtils.isEmpty(selectedDeparts)) throw new CustomException("No selectedDeparts selected");
+        String selectedAccount = jsonObject.getString("account");
+        if(oConvertUtils.isEmpty(selectedAccount)) throw new CustomException("No account selected");
+
+        String selectedName= jsonObject.getString("name");
+        if(oConvertUtils.isEmpty(selectedName)) throw new CustomException("No name selected");
+
+        String selectedPassword = jsonObject.getString("password");
+        if(oConvertUtils.isEmpty(selectedPassword)) throw new CustomException("No password selected");
+
+        String selectedPhone = jsonObject.getString("phone");
+        if(oConvertUtils.isEmpty(selectedPhone)) throw new CustomException("No phone selected");
+
+        SysUser existUser = sysUserService.queryUserByAccount(selectedAccount);
+        if(existUser != null) return Result.error("用户名: " + selectedAccount + "的账户已存在");
+
         try {
-            SysUser user = JSON.parseObject(jsonObject.toJSONString(), SysUser.class);
-            if(user.getName().isEmpty()){throw new Exception("Name is empty");}
+            //SysUser user = JSON.parseObject(jsonObject.toJSONString(), SysUser.class);
+           // if(user.getName().isEmpty()){throw new Exception("Name is empty");}
+            SysUser user = new SysUser();
 
             String hashAlgorithmName = "MD5";//加密方式
-            Object crdentials = user.getPassword();//密码原值
+            Object crdentials = selectedPassword;//密码原值
             String salt = SaltUtils.getSalt(8);;//8位随机盐
             int hashIterations = 1;//加密1次
             Object newPasswd = new SimpleHash(hashAlgorithmName,crdentials,salt,hashIterations);
-
+//
             user.setSalt(salt);
             user.setPassword(newPasswd.toString());
             user.setState(1);
+            user.setName(selectedName);
+            user.setAccount(selectedAccount);
+            user.setType(0);
+            user.setPhone(selectedPhone);
 
-            //user.setDelFlag(CommonConstant.DEL_FLAG_0);
             // 保存用户走一个service 保证事务
-            sysUserService.saveUser(user,selectedRoles,selectedDeparts);
+            sysUserService.saveUser(user,depId);
+            result.setResult(user);
             result.success200("添加用户成功！");
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -85,13 +111,53 @@ public class SysUserController {
     }
 
     /**
-     * 用户删除;
+     * 用户信息;
      * @return
-     */
-    @RequestMapping("/userDel")
-    @RequiresPermissions("userInfo:del")//权限管理;
-    public String userDel(){
+    */
+    @RequestMapping("/info")
+    public Result<?> userInfo(){
 
-        return "userInfoDel";
+        SysUser sysUser = new SysUser();
+        Result result = new Result();
+
+        try{
+            PropertyUtils.copyProperties(sysUser, SecurityUtils.getSubject().getPrincipal());
+        }
+        catch (Exception e){
+            return result.error500(e.getMessage());
+        }
+
+        if(sysUser.getType()==0){//
+            // 获取用户部门信息
+            JSONObject obj = new JSONObject();
+            List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
+            List<String> roles = sysRoleService.queryUserRoles(sysUser.getId());
+            SysDepart depart = departs.size()>0 ? departs.get(0) : null;
+            obj.put("name", sysUser.getName());
+            obj.put("depart", depart);
+
+            if(roles.size()>0)
+                obj.put("roles",roles );
+            else obj.put("roles",null );
+            result.setResult(obj);
+            result.success200("获取信息成功");
+        }else if(sysUser.getType()==1){
+            //获取商户信息
+            JSONObject obj = new JSONObject();
+            // obj.put("merInfo", merchantsService.getById(sysUser.getMerId()));
+            obj.put("userInfo", sysUser);
+            result.setResult(obj);
+            result.success200("获取信息成功");
+        }else if(sysUser.getType()==2){
+            //获取车主信息
+            JSONObject obj = new JSONObject();
+            //obj.put("merInfo", merchantsService.getById(sysUser.getMerId()));
+            obj.put("userInfo", sysUser);
+            result.setResult(obj);
+            result.success200("获取信息成功");
+        }
+        else  result.error500("获取用户信息失败");
+        return result;
     }
+
 }

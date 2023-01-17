@@ -54,13 +54,13 @@ public class SysLogService implements ISysLogService {
         if(user==null){
             try {
                 SysUser sysUser = (SysUser) SecurityUtils.getSubject().getPrincipal();
-                sysLog.setUsername(sysUser.getUsername());
+                sysLog.setUsername(sysUser.getAccount());
             } catch (Exception e) {
                 //e.printStackTrace();
             }
         }
         if(user!=null){
-            sysLog.setUsername(user.getUsername());
+            sysLog.setUsername(user.getAccount());
         }
         sysLog.setCreateTime(new Date());
         //保存日志（异常捕获处理，防止数据太大存储失败，导致业务失败）JT-238

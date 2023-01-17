@@ -11,7 +11,7 @@ public class SysUser implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     private String id;
-    private String username;//帐号
+    private String account;//帐号
     private String name;//名称（昵称或者真实姓名，不同系统不同定义）
     private String password; //密码;
     private String salt;//加密密码的盐
@@ -19,7 +19,7 @@ public class SysUser implements Serializable {
     private String phone;
 
 
-    private Integer type;//用户类型--0 商户--1 车主--2
+    private Integer type;//用户类型 商户--0 车主--1
 
 
     public String getId() {
@@ -28,11 +28,11 @@ public class SysUser implements Serializable {
     public void setId(String id) {
         this.id = id;
     }
-    public String getUsername() {
-        return username;
+    public String getAccount() {
+        return account;
     }
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAccount(String account) {
+        this.account = account;
     }
     public String getName() {
         return name;
@@ -76,12 +76,5 @@ public class SysUser implements Serializable {
         return this.phone;
     }
 
-    /**
-     * 密码盐.
-     * @return
-     */
-    public String getCredentialsSalt(){
-        return this.username+this.salt;
-    }
-    //重新对盐重新进行了定义，用户名+salt，这样就更加不容易被破解
+
 }

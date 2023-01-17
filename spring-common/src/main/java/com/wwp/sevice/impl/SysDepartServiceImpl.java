@@ -84,7 +84,7 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	 * saveDepartData 对应 add 保存用户在页面添加的新的部门对象数据
 	 */
 	@Override
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void saveDepartData(SysDepart sysDepart) {
 
 		if (sysDepart.getParentId() == null) {

@@ -1,5 +1,6 @@
 package com.wwp.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.wwp.common.constant.CommonConstant;
 import com.wwp.common.util.PinyinUtils;
 import com.wwp.common.util.oConvertUtils;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
  * @Author: Steve @Since： 2019-01-22
  */
 @RestController
-@RequestMapping("/sys/sysDepart")
+@RequestMapping("/sys/depart")
 
 
 public class SysDepartController {
@@ -44,8 +45,8 @@ public class SysDepartController {
 	 */
 
 	@RequestMapping(value = "/queryTreeList", method = RequestMethod.GET)
-	public Result<List<DepartIdModel>> queryTreeList()throws Exception {
-		Result<List<DepartIdModel>> result = new Result<>();
+	public Result<JSONObject> queryTreeList()throws Exception {
+		Result<JSONObject> result = new Result<>();
 		SysUser sysUser = new SysUser();
 		PropertyUtils.copyProperties(sysUser,SecurityUtils.getSubject().getPrincipal());
 
@@ -54,13 +55,15 @@ public class SysDepartController {
 		SysDepart depart =  (departs == null || departs.isEmpty()) ? null:departs.get(0);
 		try {
 			List<DepartIdModel> list = sysDepartService.queryUserDepartIdList(depart);
-			result.setResult(list);
+			JSONObject obj = new JSONObject();
+			obj.put("departTree",list);
+			result.setResult(obj);
 			result.setCode(200);
 			result.setSuccess(true);
 		} catch (Exception e) {
 			result.setCode(500);
 			result.setSuccess(false);
-			result.setMessage(e.toString());
+			result.setMessage(e.getMessage());
 		}
 		return result;
 	}
@@ -71,18 +74,23 @@ public class SysDepartController {
 	 * @return
 	 */
 
-	@RequestMapping(value = "/addDepart", method = RequestMethod.POST)
+	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	public Result<?> add(@RequestBody SysDepart sysDepart, HttpServletRequest request) {
 		if(oConvertUtils.isEmpty(sysDepart.getDepartName())) {
 			return Result.error("请传参数：departName");
 		}
 
-		if(oConvertUtils.isEmpty(sysDepart.getOrgCategory()))  {
-			return Result.error("请输入参数:orgCategory");
-		}
+		if(oConvertUtils.isEmpty(sysDepart.getParentId()))  {
 
-		if(oConvertUtils.isEmpty(sysDepart.getParentId()) && (sysDepart.getOrgCategory()!=1))  {
-			return Result.error("非城市顶级部门必须有父级部门");
+			sysDepart.setOrgCategory(1);//城市顶级部门
+
+		}
+		else{
+			SysDepart parentDepart = sysDepartService.queryDepartById(sysDepart.getParentId());
+			if(parentDepart.getOrgCategory()==4) return Result.error(parentDepart.getDepartName() + "不应该有子部门");
+			else {
+				sysDepart.setOrgCategory(parentDepart.getOrgCategory()+1);
+			}
 		}
 		SysDepart existDepart = sysDepartService.queryOneByParentIdAndName(sysDepart.getParentId(), sysDepart.getDepartName());
 		if(existDepart != null) return Result.error(sysDepart.getDepartName() + "已存在");
@@ -94,10 +102,10 @@ public class SysDepartController {
 		try {
 			sysDepart.setDelFlag("0");
 			sysDepart.setState(1);
-			//sysDepart.setCreateBy(username);
 			sysDepartService.saveDepartData(sysDepart);
 			result.success200("添加成功！");
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.error500("操作失败");
 		}
 		return result;

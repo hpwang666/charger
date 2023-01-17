@@ -24,8 +24,7 @@ public interface ISysRoleService  {
     public boolean deleteRole(String roleid);
 
 
+    List<SysRole> queryUserSysRoles(String userId);
 
-    List<SysRole> queryUserRoles(String userId);
-
-
+    List<String> queryUserRoles(String userId);
 }

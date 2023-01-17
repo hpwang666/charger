@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface SysUserMapper {
-      SysUser getUserByUsername(String username);
+      SysUser getUserByAccount(String account);
       void reg(SysUser sysUser);
       List<Map<String, Object>> queryAllUsers();
       List<String> queryUserIdByDepId(String depId);

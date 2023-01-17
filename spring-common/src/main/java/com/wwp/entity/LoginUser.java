@@ -6,7 +6,7 @@ public class LoginUser {
         /**
          * 登录人账号
          */
-        private String username;
+        private String account;
 
         /**
          * 登录人密码
@@ -17,14 +17,14 @@ public class LoginUser {
 
          private String type;
 
-        public String getUsername(){
-            return this.username;
+        public String getAccount(){
+            return this.account;
         }
         public String getPassword(){
             return this.password;
         }
-        public void setUsername(String username){
-             this.username=username;
+        public void setAccount(String account){
+             this.account = account;
         }
         public void setPassword(String password){
              this.password=password;

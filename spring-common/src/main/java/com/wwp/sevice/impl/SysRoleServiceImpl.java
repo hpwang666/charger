@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,7 +48,20 @@ public class SysRoleServiceImpl implements ISysRoleService {
 
 
     @Override
-    public List<SysRole> queryUserRoles(String userId) {
+    public List<SysRole> queryUserSysRoles(String userId) {
         return sysUserRoleMapper.queryUserRoles(userId);
     }
+
+    @Override
+    public List<String> queryUserRoles(String userId){
+        List<SysRole> sysRolesList = sysUserRoleMapper.queryUserRoles(userId);
+        List<String> rolesList = new ArrayList<String>();
+
+        for(SysRole role :sysRolesList ){
+            rolesList.add(role.getRole());
+        }
+        return rolesList;
+    }
+
+
 }

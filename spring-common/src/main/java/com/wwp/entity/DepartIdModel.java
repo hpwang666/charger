@@ -1,5 +1,7 @@
 package com.wwp.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class DepartIdModel implements Serializable {
     private String value;
 
     // 部门名称
-    private String lable;
+    private String label;
 
     private Integer orgCategory;
     
@@ -38,7 +40,7 @@ public class DepartIdModel implements Serializable {
     public DepartIdModel convert(SysDepartTreeModel treeModel) {
         this.key = treeModel.getId();
         this.value = treeModel.getDepartName();
-        this.lable = treeModel.getDepartName();
+        this.label = treeModel.getDepartName();
         this.orgCategory = treeModel.getOrgCategory();
         return this;
     }
@@ -51,7 +53,7 @@ public class DepartIdModel implements Serializable {
     public DepartIdModel convertByUserDepart(SysDepart sysDepart) {
         this.key = sysDepart.getId();
         this.value = sysDepart.getDepartName();
-        this.lable = sysDepart.getDepartName();
+        this.label = sysDepart.getDepartName();
         this.orgCategory = sysDepart.getOrgCategory();
         return this;
     } 
@@ -84,12 +86,12 @@ public class DepartIdModel implements Serializable {
         this.value = value;
     }
 
-    public String getLable() {
-        return lable;
+    public String getLabel() {
+        return label;
     }
 
-    public void setLable(String title) {
-        this.lable = title;
+    public void setLabel(String title) {
+        this.label = title;
     }
 
     public Integer getOrgCategory() {

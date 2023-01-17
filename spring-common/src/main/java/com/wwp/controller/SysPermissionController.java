@@ -142,7 +142,7 @@ public class SysPermissionController {
 		catch (Exception e){
 			throw e;
 		}
-		List<SysRole> sysRoles = sysUserRoleService.getRoleByUserName(sysUser.getUsername());//getRoleByUserName
+		List<SysRole> sysRoles = sysUserRoleService.getRoleByUserName(sysUser.getAccount());//getRoleByUserName
 		List<SysPermission> permissionList;
 
 		String url = getPathWithinApplication(request);

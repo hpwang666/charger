@@ -32,7 +32,7 @@ public class CustomExceptionHandler {
 
 	@ExceptionHandler(NoHandlerFoundException.class)
 	public Result<?> handlerNoFoundException(Exception e) {
-		return Result.error(404, "路径不存在，请检查路径是否正确");
+		return Result.error(404, "路径不存在"+e.getMessage());
 	}
 
 	@ExceptionHandler(Exception.class)

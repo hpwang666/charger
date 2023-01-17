@@ -10,5 +10,5 @@ public interface SysUserDepartMapper {
 	
 	List<SysUserDepart> getUserDepartByUid(@Param("userId") String userId);
 
-	void save(@Param("userId") String userId ,@Param("depart_id") String departId);
+	void save(SysUserDepart sysUserDepart);
 }
