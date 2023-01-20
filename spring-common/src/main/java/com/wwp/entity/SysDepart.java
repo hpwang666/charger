@@ -1,9 +1,12 @@
 package com.wwp.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wwp.common.aspect.annotation.Id;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -51,8 +54,11 @@ public class SysDepart implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String delFlag;//删除状态（0，正常，1已删除）
 
+	/**更新日期*/
+	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date updateTime;
 
-	//private List<SysDepart> parentList;
 
 	public void setId(String id)
 	{
@@ -161,6 +167,13 @@ public class SysDepart implements Serializable {
 		return this.delFlag;
 	}
 
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public Date getUpdateTime() {
+		return updateTime;
+	}
 
 	/**
 	 * 重写equals方法

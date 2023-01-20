@@ -9,8 +9,19 @@
 
     <!--  将数据库生成的id 返回到SysUser中-->
     <insert id="reg"   parameterType="com.wwp.entity.SysUser">
-        INSERT INTO sys_user set id=#{id},account=#{account},password=#{password},`name`=#{name},salt=#{salt},`state`=#{state},`type`=#{type}
+        INSERT INTO sys_user set id=#{id},account=#{account},password=#{password},`name`=#{name},salt=#{salt},`phone`=#{phone},`state`=#{state},`type`=#{type}
     </insert>
+
+    <update id="updateUser"   parameterType="com.wwp.entity.SysUser">
+            UPDATE sys_user
+            <trim prefix="set" suffixOverrides=",">
+                <if test="name!=null">`name`=#{name,jdbcType=VARCHAR},</if>
+                <if test="password!=null">password=#{password,jdbcType=VARCHAR},</if>
+                <if test="salt!=null">salt=#{salt,jdbcType=VARCHAR},</if>
+                <if test="phone != null">phone = #{phone,jdbcType=VARCHAR}</if>
+            </trim>
+            WHERE id =#{id,jdbcType=VARCHAR}
+    </update>
 
     <resultMap id="BaseResultMap" type="java.util.Map">
         <result column="account" property="account"/>
@@ -22,5 +33,17 @@
 
     <select id ="queryUserIdByDepId" resultType ="java.util.List">
         select user_id from sys_user_depart where depart_id = #{depId}
+    </select>
+
+
+    <select id ="queryUsersByDepId" parameterType="String" resultType="com.wwp.entity.SysUser">
+        SELECT *
+        FROM sys_user
+        WHERE id IN (
+            SELECT user_id
+            FROM sys_user_depart
+            WHERE depart_id = #{depId}
+            )
+        and state = 1
     </select>
 </mapper>

@@ -22,4 +22,7 @@ public interface SysUserRoleMapper {
     @Select("select * from sys_user_role ")
     List<SysUserRole> list();
 
+    @Delete("delete from sys_user_role where user_id=#{userId}")
+    void deleteByUserId(String userId);
+
 }

@@ -39,15 +39,14 @@ public class SysDepartServiceImpl implements ISysDepartService {
     ISysUserService sysUserService;
 
 	/**
-	 * queryTreeList 对应 queryTreeList 查询所有的部门数据,以树结构形式响应给前端
-	 */
+	* 根据用户的部门查出所以子部门，以及相关的单线父级部门
+	* */
 	@Override
-	public List<DepartIdModel> queryUserDepartIdList(SysDepart depart) {
+	public List<SysDepart> queryUserDepartIdList(SysDepart depart) {
 		Integer parentCategory = 1;
 		List<SysDepart> list;
 		List<SysDepart>  parentList;
 		if(depart != null) {
-			parentCategory =  1;
 			list = queryChildDepartById(depart.getId());
 			list.add(depart);//加入自己的部门
 			parentList = queryParentDepartById(depart.getId());//直线上顶层到集团
@@ -58,8 +57,7 @@ public class SysDepartServiceImpl implements ISysDepartService {
 			list = queryAllDeparts();
 		}
 
-		List<DepartIdModel> listResult = FindsDepartsChildrenUtil.wrapTreeDataToDepartIdTreeList(list, parentCategory);
-		return listResult;
+		return list;
 	}
 
 	@Override
@@ -95,6 +93,7 @@ public class SysDepartServiceImpl implements ISysDepartService {
 		if(sysDepart.getPayChannel() == null) {
 			sysDepart.setPayChannel(0);
 		}
+		sysDepart.setUpdateTime(new Date());
 		//生成支付编码
 //			sysDepart.setPayCode(createPayCode(sysDepart.getPayChannel()));
 		sysDepartMapper.save(sysDepart);
@@ -167,7 +166,7 @@ public class SysDepartServiceImpl implements ISysDepartService {
 		return sysDepartMapper.queryAllDeparts();
 	}
 
-    //包含本部门的父爷ID 单线上最顶层，不包含自己
+    //包含本部门的父、爷ID 单线上最顶层部门，不包含自己
 	@Override
     public List<SysDepart> queryParentDepartById(String id) {
 		List<SysDepart> list = new ArrayList<SysDepart>();
@@ -242,7 +241,6 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	 */
 	@Override
 	public List<SysDepart> queryDepartsByIdList(Integer orgCategory, String departName, List<String> idList) {
-		if(idList.size()>0) idList = null;
 		String departNamePy = PinyinUtils.getPinYinHeadChar(departName);
 
 		Map<String, Object> map=new HashMap<>();
@@ -297,7 +295,11 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	}
 
 
-
+	/**
+	 * 获取用户所在的部门
+	 * @param userId
+	 * @return
+	 */
 	@Override
 	public List<SysDepart> queryUserDeparts(String userId) {
 		return sysDepartMapper.queryUserDeparts(userId);

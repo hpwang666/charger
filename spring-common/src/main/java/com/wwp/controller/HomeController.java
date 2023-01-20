@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,6 +82,7 @@ public class HomeController {
 
             SysUser sysUser1 = new SysUser();
             PropertyUtils.copyProperties(sysUser1,SecurityUtils.getSubject().getPrincipal());
+            sysUserService.updateLoginTimeById(sysUser1.getId());
             System.out.println("user:  "+sysUser1.getAccount());
             return result;
         } catch (Exception e) {

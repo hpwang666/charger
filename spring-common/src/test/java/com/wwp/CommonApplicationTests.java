@@ -52,16 +52,7 @@ public class CommonApplicationTests {
 
 
 
-	public void getDeparts() throws Exception{
-		List<SysDepart> departs = sysDepartService.queryUserDeparts("17");
 
-		SysDepart depart =  (departs == null || departs.isEmpty()) ? null:departs.get(1);
-		List<DepartIdModel> list = sysDepartService.queryUserDepartIdList(depart);
-
-		for(DepartIdModel departModel:list){
-			System.out.println(departModel.getLabel());
-		}
-	}
 
 
 	public void testRedis() throws Exception{

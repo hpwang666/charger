@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class SysUserService implements ISysUserService {
@@ -52,6 +49,7 @@ public class SysUserService implements ISysUserService {
             Integer orgCategory =depart.getOrgCategory()+1;//可管理的部门层级
 
             //添加角色
+            //目前设定每个用户都会被添加admin 角色
             for(int i=orgCategory;i<5;i++){
                 String roleId =sysRoleMapper.getRoleIdByRole(roles[i-1]);
                 if(oConvertUtils.isEmpty(roleId)) throw new CustomException("未找到role："+roles[i-1]);
@@ -64,6 +62,24 @@ public class SysUserService implements ISysUserService {
         }
 
 
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteById(String userId)
+    {
+        sysUserMapper.deleteById(userId);
+        sysUserRoleMapper.deleteByUserId(userId);
+        sysUserDepartMapper.deleteByUserId(userId);
+    }
+
+    @Override
+    public    SysUser queryUserById(String id){
+        return sysUserMapper.queryUserById(id);
+    }
+
+    @Override
+    public    void updateUser(SysUser sysUser){
+         sysUserMapper.updateUser(sysUser);
     }
 
     @Override
@@ -87,5 +103,15 @@ public class SysUserService implements ISysUserService {
     public  SysUser queryUserByAccount(String account)
     {
         return  sysUserMapper.getUserByAccount(account);
+    }
+
+    @Override
+    public List<SysUser> queryUsersByDepId(String depId){
+        return  sysUserMapper.queryUsersByDepId(depId);
+    }
+
+    @Override
+    public void updateLoginTimeById(String id){
+         sysUserMapper.updateLoginTimeById(new Date(),id);
     }
 }

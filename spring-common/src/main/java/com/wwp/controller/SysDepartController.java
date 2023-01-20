@@ -2,6 +2,7 @@ package com.wwp.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.wwp.common.constant.CommonConstant;
+import com.wwp.common.util.FindsDepartsChildrenUtil;
 import com.wwp.common.util.PinyinUtils;
 import com.wwp.common.util.oConvertUtils;
 import com.wwp.entity.DepartIdModel;
@@ -54,9 +55,10 @@ public class SysDepartController {
 		//超级管理员是没有部门的 为null
 		SysDepart depart =  (departs == null || departs.isEmpty()) ? null:departs.get(0);
 		try {
-			List<DepartIdModel> list = sysDepartService.queryUserDepartIdList(depart);
+			List<SysDepart> list = sysDepartService.queryUserDepartIdList(depart);
+			List<DepartIdModel> listResult = FindsDepartsChildrenUtil.wrapTreeDataToDepartIdTreeList(list, 1);
 			JSONObject obj = new JSONObject();
-			obj.put("departTree",list);
+			obj.put("departTree",listResult);
 			result.setResult(obj);
 			result.setCode(200);
 			result.setSuccess(true);
@@ -81,9 +83,7 @@ public class SysDepartController {
 		}
 
 		if(oConvertUtils.isEmpty(sysDepart.getParentId()))  {
-
 			sysDepart.setOrgCategory(1);//城市顶级部门
-
 		}
 		else{
 			SysDepart parentDepart = sysDepartService.queryDepartById(sysDepart.getParentId());
@@ -103,6 +103,7 @@ public class SysDepartController {
 			sysDepart.setDelFlag("0");
 			sysDepart.setState(1);
 			sysDepartService.saveDepartData(sysDepart);
+			result.setResult(sysDepart);
 			result.success200("添加成功！");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -130,68 +131,31 @@ public class SysDepartController {
 //			@ApiImplicitParam(name = "pageSize", value = "一页条数", dataTypeClass = Integer.class, paramType = "query")
 //	})
 	public Result<?> list(@RequestParam Integer orgCategory, @RequestParam(required = false) String departName, @RequestParam(required = false) String cityId,
-                                        @RequestParam(required = false) String groupId, @RequestParam(required = false) String companyId, @RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNo) {
-		SysUser sysUser = (SysUser) SecurityUtils.getSubject().getPrincipal();
-		if(orgCategory == null) return Result.error("请输入参数:orgCategory");
-		if(pageNo == null || pageNo <= 0) pageNo = 1;
-		if(pageSize == null || pageSize <= 0) pageSize = Integer.MAX_VALUE;
+                          @RequestParam(required = false) String groupId, @RequestParam(required = false) String companyId,
+						  @RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNo) throws Exception {
+		SysUser sysUser = new SysUser();
+		PropertyUtils.copyProperties(sysUser, SecurityUtils.getSubject().getPrincipal());
 
-
+		if (orgCategory == null) return Result.error("请输入参数:orgCategory");
+		if (pageNo == null || pageNo <= 0) pageNo = 1;
+		if (pageSize == null || pageSize <= 0) pageSize = Integer.MAX_VALUE;
 
 		List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
 
-
-	//	if(CollectionUtil.isEmpty(departs)&&!sysUser.getId().equals("e9ca23d68d884d4ebb19d07889727dae")){
-	//		return Result.OK();
-	//	}
-
-		if(departs!=null && !departs.isEmpty()) {
-			SysDepart sysDepart = departs.get(0);
-			int orgType = sysDepart.getOrgCategory();
-			if(orgType == CommonConstant.DEPART_TYPE_CITY && oConvertUtils.isEmpty(cityId)) {
-				cityId = sysDepart.getId();
-			} else if(orgType == CommonConstant.DEPART_TYPE_GROUP && oConvertUtils.isEmpty(groupId)) {
-				groupId = sysDepart.getId();
-			} else if(orgType == CommonConstant.DEPART_TYPE_COMPANY && oConvertUtils.isEmpty(companyId)) {
-				companyId = sysDepart.getId();
-			}else if(orgType == CommonConstant.DEPART_TYPE_PROJ ) {
-				return Result.OK("查询成功！",departs);
-			}else{
-				//return Result.ok();
-			}
-		}
-
-
-
-		List<SysDepart> sysDepartList = new ArrayList<>();
-		try {
-			if(oConvertUtils.isNotEmpty(cityId)) {
-				List<SysDepart> list = sysDepartService.queryChildDepartById(cityId);
-				if(!(list == null || list.isEmpty())) sysDepartList.addAll(list);
-			}else if(oConvertUtils.isNotEmpty(groupId)) {
-				sysDepartList.clear();
-				List<SysDepart> list = sysDepartService.queryChildDepartById(groupId);
-				if(!(list == null || list.isEmpty())) sysDepartList.addAll(list);
-			}else if(oConvertUtils.isNotEmpty(companyId)) {
-				sysDepartList.clear();
-				List<SysDepart> list = sysDepartService.queryChildDepartById(companyId);
-				if(!(list == null || list.isEmpty())) sysDepartList.addAll(list);
-			}
-
+		try{
+			List<SysDepart> sysDepartList = sysDepartService.queryUserDepartIdList(departs.get(0));
 			List<String> idList = sysDepartList.stream().map(SysDepart::getId).collect(Collectors.toList());
-			List<SysDepart> records = sysDepartService.queryDepartsByIdList(orgCategory, departName, idList);
-			//List<SysDepart> records = sysDepartPage.getRecords();
-			for (SysDepart sysDepart : records) {
-				List<SysDepart> parentList = sysDepartService.queryParentDepartById(sysDepart.getId());
-				//这里暂时没有启用parentList
-				//sysDepart.setParentList(parentList);
-			}
-			return Result.OK("查询成功！",records);
-		} catch (Exception e) {
-			return Result.error("查询失败",e.getMessage());
-		}
-	}
 
+			List<SysDepart> records = sysDepartService.queryDepartsByIdList(orgCategory, departName, idList);
+
+			return Result.OK("查询成功！", records);
+
+		}
+		catch (Exception e){
+			return Result.error(e.getMessage());
+		}
+
+	}
 
 
 	@RequestMapping(value = "/parklist", method = RequestMethod.GET)

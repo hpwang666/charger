@@ -17,7 +17,12 @@ public interface ISysUserService {
 
     //根据部门id查询用户信息
     List<String> queryUserIdByDepId(String depId);
+    List<SysUser> queryUsersByDepId(String depId);
     SysUser queryUserByAccount(String username);
 
+    void updateLoginTimeById(String id);
+    void deleteById(String userId);
+    SysUser queryUserById(String id);
+    void updateUser(SysUser sysUser);
     List<SysUser> list();
 }

@@ -53,6 +53,18 @@ public class SysUserController {
         return result;
     }
 
+    @AutoLog(value = "查询部门下的所有用户",logType = 2)
+    @RequestMapping(value = "/getUsersByDepId", method = RequestMethod.GET)
+    public Result<List<SysUser>> userList(@RequestParam("departId") String departId)
+    {
+        Result<List<SysUser>> result = new Result();
+        List<SysUser> users = sysUserService.queryUsersByDepId(departId);
+        result.setSuccess(true);
+        result.setResult(users);
+        result.setCode(200);
+        return result;
+    }
+
     /**
      * 用户添加;
      * @return
@@ -62,7 +74,7 @@ public class SysUserController {
     //@RequiresPermissions("user:add")
     @AutoLog(value = "注册账户",logType = 2)
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public Result<?> userAdd(@RequestBody JSONObject jsonObject,@RequestParam(name="depId") String depId) throws Exception{
+    public Result<?> userAdd(@RequestBody JSONObject jsonObject,@RequestParam(name="departId") String departId) throws Exception{
         Result<SysUser> result = new Result<SysUser>();
         String selectedAccount = jsonObject.getString("account");
         if(oConvertUtils.isEmpty(selectedAccount)) throw new CustomException("No account selected");
@@ -99,7 +111,7 @@ public class SysUserController {
             user.setPhone(selectedPhone);
 
             // 保存用户走一个service 保证事务
-            sysUserService.saveUser(user,depId);
+            sysUserService.saveUser(user,departId);
             result.setResult(user);
             result.success200("添加用户成功！");
         } catch (Exception e) {
@@ -158,6 +170,44 @@ public class SysUserController {
         }
         else  result.error500("获取用户信息失败");
         return result;
+    }
+
+    @AutoLog(value = "删除用户",logType = 2)
+    @RequestMapping(value = "/delete", method = RequestMethod.GET)
+    public Result<?> delete(@RequestParam("userId") String userId)
+    {
+        sysUserService.deleteById(userId);
+        return Result.OK();
+    }
+
+    @AutoLog(value = "编辑用户",logType = 2)
+    @RequestMapping(value = "/edit", method = RequestMethod.POST)
+    public Result<SysUser> edit(@RequestBody SysUser user)
+    {
+        SysUser sysUser = sysUserService.queryUserById(user.getId());
+
+        if(sysUser == null) throw new CustomException("没有此用户");
+        if(oConvertUtils.isNotEmpty(user.getName())) {
+            sysUser.setName(user.getName());
+        }
+        if(oConvertUtils.isNotEmpty(user.getPassword())) {
+
+            String hashAlgorithmName = "MD5";//加密方式
+            Object crdentials = user.getPassword();//密码原值
+            String salt = SaltUtils.getSalt(8);;//8位随机盐
+            int hashIterations = 1;//加密1次
+            Object newPasswd = new SimpleHash(hashAlgorithmName,crdentials,salt,hashIterations);
+            sysUser.setPassword(newPasswd.toString());
+            sysUser.setSalt(salt);
+        }
+        if(oConvertUtils.isNotEmpty(user.getPhone())) {
+            sysUser.setPhone(user.getPhone());
+        }
+//        if(oConvertUtils.isNotEmpty(user.getMemo())) {
+//            sysUser.setMemo(user.getMemo());
+//        }
+        sysUserService.updateUser(sysUser);
+        return Result.OK(sysUser);
     }
 
 }

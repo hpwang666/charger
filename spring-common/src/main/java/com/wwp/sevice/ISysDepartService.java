@@ -17,10 +17,9 @@ import java.util.List;
 public interface ISysDepartService {
 
     /**
-     * 查询所有部门信息,并分节点进行显示
-     * @return
-     */
-    List<DepartIdModel> queryUserDepartIdList(SysDepart depart);
+     * 根据用户的部门查出所以子部门，以及相关的单线父级部门
+     * */
+    List<SysDepart> queryUserDepartIdList(SysDepart depart);
 
     /**
      * 查询所有部门DepartId信息,并分节点进行显示
@@ -89,12 +88,11 @@ public interface ISysDepartService {
 
     List<SysDepart> queryChildAllPark();
 
-   List<SysDepart> queryAllDeparts();
+    List<SysDepart> queryAllDeparts();
 
 	List<SysDepart> queryParentDepartById(String id);
 
 	SysDepart queryOneByParentIdAndName(String parentId, String name);
 
-
-     List<SysDepart> queryChildDepartByIds(String ids);
+	List<SysDepart> queryChildDepartByIds(String ids);
 }

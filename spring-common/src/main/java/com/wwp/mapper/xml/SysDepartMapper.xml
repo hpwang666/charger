@@ -4,7 +4,7 @@
 
     <insert id="save"   parameterType="com.wwp.entity.SysDepart">
         INSERT INTO sys_depart set id=#{id},parent_id=#{parentId},parent_prj_id=#{parentPrjId},`depart_name`=#{departName},depart_name_py=#{departNamePy},`depart_name_abbr`=#{departNameAbbr},
-                pay_code=#{payCode}, pay_channel=#{payChannel}, org_category=#{orgCategory}, org_code=#{orgCode}, memo=#{memo}, state=#{state}, del_flag=#{delFlag}
+                pay_code=#{payCode}, pay_channel=#{payChannel}, org_category=#{orgCategory}, org_code=#{orgCode}, memo=#{memo}, state=#{state}, del_flag=#{delFlag},update_time=#{updateTime}
     </insert>
 
     <update id="update">
@@ -82,7 +82,7 @@
     <select id="queryDepartsByNamePy" parameterType="String"  resultType="com.wwp.entity.SysDepart">
         select * from sys_depart where 1=1
         <if test="departNamePy != null and namePy != ''">
-            AND (epart_name_py like '%${departNamePy}%')
+            AND (depart_name_py like '%${departNamePy}%')
         </if>
         and del_flag != '1'
     </select>

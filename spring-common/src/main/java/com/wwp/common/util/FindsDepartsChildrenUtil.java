@@ -81,7 +81,6 @@ public class FindsDepartsChildrenUtil {
         for (int i = 0; i < recordList.size(); i++) {
             SysDepartTreeModel branch = recordList.get(i);
             if( branch.getOrgCategory().equals(parentCategory)){//只找下一级儿子 parentCategory 是1 后就是顶层集团
-                System.out.println("城市 "+branch.getDepartName());
                 treeList.add(branch);
                 DepartIdModel departIdModel = new DepartIdModel().convert(branch);
                 departIdList.add(departIdModel);
