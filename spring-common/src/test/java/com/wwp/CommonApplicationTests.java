@@ -9,6 +9,7 @@ import com.wwp.entity.SysUser;
 import com.wwp.mapper.SysPermissionMapper;
 import com.wwp.mapper.SysUserMapper;
 import com.wwp.sevice.ISysDepartService;
+import com.wwp.sevice.ISysRoleService;
 import com.wwp.sevice.ISysUserRoleService;
 import com.wwp.sevice.impl.SysLogService;
 import com.wwp.sevice.impl.SysUserService;
@@ -49,8 +50,8 @@ public class CommonApplicationTests {
 	@Resource
 	private RedisUtil  redisUtil;
 
-
-
+	@Resource
+	private ISysRoleService sysRoleService;
 
 
 
@@ -65,6 +66,13 @@ public class CommonApplicationTests {
 		//System.out.println(JwtUtil.verify(token, "love", "f2efaa3e834261a5ae4bac1123fba47b"));
 
 	}
+
+	@Test
+	public void testRoles()
+	{
+		System.out.println(sysUserService.queryUserIdByDepId("04bc433d888d4cee92098d718e06d972"));
+	}
+
 
 
 

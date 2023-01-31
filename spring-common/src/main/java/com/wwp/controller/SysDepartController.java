@@ -141,9 +141,10 @@ public class SysDepartController {
 		if (pageSize == null || pageSize <= 0) pageSize = Integer.MAX_VALUE;
 
 		List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
-
+		//超级管理员是没有部门的 为null
+		SysDepart depart =  (departs == null || departs.isEmpty()) ? null:departs.get(0);
 		try{
-			List<SysDepart> sysDepartList = sysDepartService.queryUserDepartIdList(departs.get(0));
+			List<SysDepart> sysDepartList = sysDepartService.queryUserDepartIdList(depart);
 			List<String> idList = sysDepartList.stream().map(SysDepart::getId).collect(Collectors.toList());
 
 			List<SysDepart> records = sysDepartService.queryDepartsByIdList(orgCategory, departName, idList);
@@ -249,7 +250,7 @@ public class SysDepartController {
 
 		if(isDepartNameChange || isParentIdChange) {  //不一样则判断
 			SysDepart existDepart = sysDepartService.queryOneByParentIdAndName(newParentId, newDepartName);
-			if(existDepart != null) return Result.error(newDepartName + "已存在");
+			if(existDepart != null) return Result.error(newDepartName + " 已存在于 "+sysDepartService.queryDepartById(newParentId).getDepartName()+" 之下");
 		}
 
 		if(oConvertUtils.isNotEmpty(sysDepart.getDepartNameAbbr())) {

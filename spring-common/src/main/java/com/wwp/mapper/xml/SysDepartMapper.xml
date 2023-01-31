@@ -7,7 +7,7 @@
                 pay_code=#{payCode}, pay_channel=#{payChannel}, org_category=#{orgCategory}, org_code=#{orgCode}, memo=#{memo}, state=#{state}, del_flag=#{delFlag},update_time=#{updateTime}
     </insert>
 
-    <update id="update">
+    <update id="update" parameterType="com.wwp.entity.SysDepart">
         update sys_depart
         <trim prefix="set" suffixOverrides=",">
             <if test="parentId!=null">`parent_id`=#{parentId,jdbcType=VARCHAR},</if>
@@ -19,6 +19,7 @@
             <if test="orgCategory!=null">org_category=#{orgCategory,jdbcType=TINYINT},</if>
             <if test="orgCode!=null">org_code=#{orgCode,jdbcType=VARCHAR},</if>
             <if test="memo!=null">memo=#{memo,jdbcType=VARCHAR},</if>
+            <if test="updateTime!=null">update_time=#{updateTime,jdbcType=TIMESTAMP},</if>
         </trim>
         WHERE id =#{id,jdbcType=VARCHAR}
     </update>

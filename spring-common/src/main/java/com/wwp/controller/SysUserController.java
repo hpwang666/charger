@@ -1,7 +1,9 @@
 package com.wwp.controller;
 
 import com.wwp.common.aspect.annotation.AutoLog;
+import com.wwp.common.constant.CommonConstant;
 import com.wwp.common.exception.CustomException;
+import com.wwp.common.util.RedisUtil;
 import com.wwp.common.util.SaltUtils;
 import com.wwp.common.util.oConvertUtils;
 import com.wwp.entity.SysDepart;
@@ -17,6 +19,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.crypto.hash.SimpleHash;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -35,6 +38,9 @@ public class SysUserController {
 
     @Resource
     private ISysRoleService sysRoleService;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     /**
      * 用户查询.
@@ -144,6 +150,7 @@ public class SysUserController {
             JSONObject obj = new JSONObject();
             List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
             List<String> roles = sysRoleService.queryUserRoles(sysUser.getId());
+            System.out.println(roles+sysUser.getId());
             SysDepart depart = departs.size()>0 ? departs.get(0) : null;
             obj.put("name", sysUser.getName());
             obj.put("depart", depart);
@@ -176,6 +183,12 @@ public class SysUserController {
     @RequestMapping(value = "/delete", method = RequestMethod.GET)
     public Result<?> delete(@RequestParam("userId") String userId)
     {
+        SysUser sysUser = sysUserService.queryUserById(userId);
+        if(sysUser!=null) {
+            redisUtil.del(CommonConstant.PREFIX_USER_TOKEN + sysUser.getAccount());
+            redisUtil.del("shiro:cache:authenticationCache:" + sysUser.getAccount());
+            redisUtil.del("shiro:cache:authorizationCache:" + sysUser.getAccount());
+        }
         sysUserService.deleteById(userId);
         return Result.OK();
     }

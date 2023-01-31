@@ -38,7 +38,7 @@ public class SysUserService implements ISysUserService {
         //step.1 保存用户
         sysUserMapper.reg(user);
 
-        String[] roles = {"city","group","com","prj"};
+        String[] roles = {"city","group","com","prj","admin"};
 
         System.out.println("生成的"+ user.getId());
 
@@ -50,7 +50,7 @@ public class SysUserService implements ISysUserService {
 
             //添加角色
             //目前设定每个用户都会被添加admin 角色
-            for(int i=orgCategory;i<5;i++){
+            for(int i=orgCategory;i<6;i++){
                 String roleId =sysRoleMapper.getRoleIdByRole(roles[i-1]);
                 if(oConvertUtils.isEmpty(roleId)) throw new CustomException("未找到role："+roles[i-1]);
                 sysUserRoleMapper.insert(UUID.randomUUID().toString().replaceAll("-", ""),user.getId(),roleId);

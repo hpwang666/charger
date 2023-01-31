@@ -43,7 +43,6 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	* */
 	@Override
 	public List<SysDepart> queryUserDepartIdList(SysDepart depart) {
-		Integer parentCategory = 1;
 		List<SysDepart> list;
 		List<SysDepart>  parentList;
 		if(depart != null) {
@@ -76,6 +75,7 @@ public class SysDepartServiceImpl implements ISysDepartService {
 	@Override
 	public boolean updateDepart(SysDepart depart)
 	{
+		depart.setUpdateTime(new Date());
 		return  sysDepartMapper.update(depart);
 	}
 	/**
