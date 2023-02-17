@@ -47,6 +47,25 @@ public class ShiroConfig {
 		filterChainDefinitionMap.put("/login", "anon");
 		filterChainDefinitionMap.put("/static/**", "anon");
 		filterChainDefinitionMap.put("/logout", "anon");
+
+		//全部为了swagger添加
+		filterChainDefinitionMap.put("/", "anon");
+		filterChainDefinitionMap.put("/**/*.js", "anon");
+		filterChainDefinitionMap.put("/**/*.css", "anon");
+		filterChainDefinitionMap.put("/**/*.html", "anon");
+		filterChainDefinitionMap.put("/**/*.svg", "anon");
+		filterChainDefinitionMap.put("/**/*.pdf", "anon");
+		filterChainDefinitionMap.put("/**/*.jpg", "anon");
+		filterChainDefinitionMap.put("/**/*.png", "anon");
+		filterChainDefinitionMap.put("/**/*.ico", "anon");
+		filterChainDefinitionMap.put("/doc.html", "anon");
+		filterChainDefinitionMap.put("/swagger-ui.html", "anon");
+		filterChainDefinitionMap.put("/swagger**/**", "anon");
+		filterChainDefinitionMap.put("/druid/**", "anon");
+		filterChainDefinitionMap.put("/webjars/**", "anon");
+		filterChainDefinitionMap.put("/v2/**", "anon");
+
+
 		filterChainDefinitionMap.put("/dev/regionDev", "authc");
 		filterChainDefinitionMap.put("/dev/**", "anon");
 
@@ -191,13 +210,13 @@ public class ShiroConfig {
 	@Bean
 	public SessionManager sessionManager() {
 		//把session存入到redis  前提需要使能session的各种
-		//ShiroSessionManager sessionManager = new ShiroSessionManager();
+		ShiroSessionManager sessionManager = new ShiroSessionManager();
 		//sessionManager.setSessionDAO(redisSessionDAO());
 
-		DefaultSessionManager shiroSessionManager = new DefaultSessionManager();
+		//DefaultSessionManager shiroSessionManager = new DefaultSessionManager();
 		// 关闭session校验轮询
-		shiroSessionManager.setSessionValidationSchedulerEnabled(false);
-		return shiroSessionManager;
+		sessionManager.setSessionValidationSchedulerEnabled(false);
+		return sessionManager;
 	}
 
 	@Bean

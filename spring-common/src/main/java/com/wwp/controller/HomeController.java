@@ -1,5 +1,6 @@
 package com.wwp.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wwp.common.constant.CommonConstant;
 import com.wwp.common.util.JwtUtil;
@@ -9,26 +10,39 @@ import com.wwp.config.JwtToken;
 import com.wwp.entity.LoginUser;
 import com.wwp.entity.SysDepart;
 import com.wwp.entity.SysUser;
+import com.wwp.model.Oauth2Token;
 import com.wwp.sevice.ISysDepartService;
 import com.wwp.sevice.ISysRoleService;
 import com.wwp.sevice.ISysUserService;
 import com.wwp.vo.Result;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 public class HomeController {
+    private  final Logger logger = LoggerFactory.getLogger(HomeController.class);
+
     @Resource
     private ISysUserService sysUserService;
 
@@ -189,5 +203,119 @@ public class HomeController {
         }
         return park;
     }
+
+
+    @ApiOperation("微信用户登录")
+    @RequestMapping(value = "/weChatLogin", method = RequestMethod.POST)
+    public Result<JSONObject> weixinLogin(
+            @RequestParam(name = "code") String code,
+            @RequestParam(name = "type", required = false) String type) throws Exception {
+
+        Result<JSONObject> result = new Result<>();
+        System.out.println("****************code:"+code);
+        // 用户同意授权
+        if (!"authdeny".equals(code)) {
+            // 获取网页授权access_token
+            Oauth2Token oauth2Token = getOauth2AccessToken(code);
+            // 用户标识
+            String openId = oauth2Token.getOpenId();
+            logger.info("***********************************oauth2Token信息："+oauth2Token.toString()+"XX_"+openId);
+
+            //1. 校验用户是否有效
+//            QueryWrapper<SysUser> query = new QueryWrapper<>();
+//            query.eq("openid", openId);
+//            if(type!=null){
+//                query.eq("type", type);
+//            }
+//
+//            List<SysUser> sysUsers = sysUserService.list();
+//            if(sysUsers.size()>0){
+//                SysUser sysUser=sysUsers.get(0);
+//                result = sysUserService.checkUserIsEffective(sysUser);
+//                if(!result.isSuccess()) {
+//                    return result;
+//                }
+//                sysUser.setOpenid(openId);
+//                //用户登录信息
+//                userInfo(sysUser, result);
+//                sysBaseAPI.addLog("openId: " + openId + ",登录成功！", CommonConstant.LOG_TYPE_1, null);
+//                sysUser.setLastLoginTime(new Date());
+//                sysUserService.updateById(sysUser);
+//            }else{
+//                result.setCode(201);
+//                result.setMessage(openId);
+//                return result;
+//            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取网页授权凭证
+     * @param code
+     * @return WeixinAouth2Token
+     */
+    public  Oauth2Token getOauth2AccessToken(String code) {
+        Oauth2Token wat = null;
+
+
+        boolean test=true;
+        String appId=test?"wx09a13be6962ab9a8":"wx653ad587382d8bf5";
+        String appSecret=test?"ab3ab13948a5887621cfbc0894ba50b9":"f5bb88a6ea418b3193261e833822e785";
+
+        // 拼接请求地址
+        String requestUrl = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code";
+        requestUrl = requestUrl.replace("APPID", appId);
+        requestUrl = requestUrl.replace("SECRET", appSecret);
+        requestUrl = requestUrl.replace("CODE", code);
+
+        logger.info("XXXXXXXXXXrequestUrl:", requestUrl);
+        // 获取网页授权凭证
+        com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(getUrl(requestUrl));
+        if (null != jsonObject) {
+            try {
+                wat = new Oauth2Token();
+                wat.setAccessToken(jsonObject.getString("access_token"));
+                wat.setExpiresIn(jsonObject.getInteger("expires_in"));
+                wat.setRefreshToken(jsonObject.getString("refresh_token"));
+                wat.setOpenId(jsonObject.getString("openid"));
+                wat.setScope(jsonObject.getString("scope"));
+
+                //String tokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="+appId+"&secret="+appSecret;
+                //log.info("XXXXXXXXXXtokenUrl:", tokenUrl+"xxxxxxxxxxxxxxx");
+                //SNSUserInfo snsUserInfo=getSNSUserInfo(getAccessToken(tokenUrl),jsonObject.getString("openid"));
+                //log.info("XXXXXXXXXXsnsUserInfo:", snsUserInfo.getHeadImgUrl());
+
+
+            } catch (Exception e) {
+                wat = null;
+                int errorCode = jsonObject.getInteger("errcode");
+                String errorMsg = jsonObject.getString("errmsg");
+                logger.error("获取网页授权凭证失败 errcode:{} errmsg:{}", errorCode, errorMsg);
+            }
+        }
+        return wat;
+    }
+
+    public static String getUrl(String url){
+        StringBuffer sb = new StringBuffer();
+        HttpGet httpGet = new HttpGet(url);
+        try {
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            HttpResponse response = httpClient.execute(httpGet);           //1
+            HttpEntity entity = response.getEntity();
+            InputStreamReader reader = new InputStreamReader(entity.getContent(),"utf-8");
+            char [] charbufer;
+            while (0<reader.read(charbufer=new char[10])){
+                sb.append(charbufer);
+            }
+        }catch (IOException e){//1
+            e.printStackTrace();
+        }finally {
+            httpGet.releaseConnection();
+        }
+        return sb.toString();
+    }
+
 
 }

@@ -8,9 +8,9 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   mvc:
     throw-exception-if-no-handler-found: true
-  #resources:
+    #resources:
     #add-mappings: false
-    static-path-pattern: /statics/** #相当于找不到静态资源
+    #static-path-pattern: /statics/** #相当于找不到静态资源
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -28,9 +28,10 @@ spring:
   #config-location:classpath: /mybatis-config.xml
 
 
-  mybatis:
-    mapper-locations: classpath*:com/wwp/mapper/xml/*Mapper.xml
-    config-location: classpath:/mybatis-config.xml
+mybatis:
+  mapper-locations: classpath*:com/wwp/mapper/xml/*Mapper.xml
+  type-aliases-package: com.wwp.entry
+  config-location: classpath:/mybatis-config.xml
 
 server:
   error:

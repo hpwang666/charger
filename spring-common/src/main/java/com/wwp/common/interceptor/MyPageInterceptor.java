@@ -7,6 +7,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.Properties;
 此拦截器会拦截所有的mysql语句，但会根据byPage来执行分页语句
 那么原语句里面就不需要配置 limit来实现分页
 */
+@Component
 @Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class,Integer.class})})
 public class MyPageInterceptor implements Interceptor {
 

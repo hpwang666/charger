@@ -1,16 +1,14 @@
 package com.wwp.mapper;
 
 import com.wwp.entity.SysUser;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@Mapper
 public interface SysUserMapper {
       SysUser getUserByAccount(String account);
 
