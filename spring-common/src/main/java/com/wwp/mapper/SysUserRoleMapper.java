@@ -3,11 +3,13 @@ package com.wwp.mapper;
 import com.wwp.entity.SysRole;
 import com.wwp.entity.SysUserRole;
 import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+@Mapper
 public interface SysUserRoleMapper {
     List<SysRole> getRoleByUserName(@Param("username") String username);
 
