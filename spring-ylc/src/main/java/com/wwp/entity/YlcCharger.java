@@ -77,6 +77,22 @@ public class YlcCharger implements Serializable {
         return plugs;
     }
 
+    public Integer getSlotIn() {
+        return slotIn;
+    }
+
+    public void setSlotIn(Integer slotIn) {
+        this.slotIn = slotIn;
+    }
+
+    public Integer getPlugHoming() {
+        return plugHoming;
+    }
+
+    public void setPlugHoming(Integer plugHoming) {
+        this.plugHoming = plugHoming;
+    }
+
     public void setPlugStatus(Integer plugStatus) {
         this.plugStatus = plugStatus;
     }
@@ -104,6 +120,7 @@ public class YlcCharger implements Serializable {
     public Date getUpdateTime() {
         return updateTime;
     }
+
 
     public Integer getDelFlag() {
         return delFlag;

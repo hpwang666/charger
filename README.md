@@ -11,7 +11,7 @@
     </configuration>
 </plugin>
 ```
-##生成分离jar时，需要将application-prod.yml 拷贝到config/下面，是因为打包时没有将yml文件打入 ，但是已经将
+**生成分离jar**时，需要将application-prod.yml 拷贝到config/下面,并以application.yml命名，是因为打包时没有将yml文件打入 ，但是已经将
 config加入了classpath。同时还需要将lib/放在运行目录下面，而这个也是在打包的时候指定了的。</br>
 ```
 java -jar ./spring-boot.jar

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class YlcChargerServiceImpl implements IYlcChargerService {
@@ -63,4 +64,9 @@ public class YlcChargerServiceImpl implements IYlcChargerService {
         else return false;
     }
 
+    @Override
+    public List<YlcCharger> queryChargersByDepId(String departId)
+    {
+        return ylcChargerMapper.queryChargersByDepId(departId);
+    }
 }

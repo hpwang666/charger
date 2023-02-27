@@ -26,6 +26,7 @@ public class SysUser implements Serializable {
     private Integer state;//用户状态,0:创建未认证（比如没有激活，没有输入验证码等等）--等待验证的用户 , 1:正常状态,2：用户被锁定.
     private String phone;
 
+    private String openid;
 
     private Integer type;//用户类型 商户--0 车主--1
 
@@ -84,6 +85,14 @@ public class SysUser implements Serializable {
     }
     public String getPhone(){
         return this.phone;
+    }
+
+    public void setOpenid(String openid) {
+        this.openid = openid;
+    }
+
+    public String getOpenid() {
+        return openid;
     }
 
     public void setLoginTime(Date loginTime) {

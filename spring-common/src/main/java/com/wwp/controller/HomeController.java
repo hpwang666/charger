@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.wwp.common.constant.CommonConstant;
 import com.wwp.common.util.JwtUtil;
 import com.wwp.common.util.RedisUtil;
+import com.wwp.common.util.SaltUtils;
 import com.wwp.common.util.oConvertUtils;
 import com.wwp.config.JwtToken;
 import com.wwp.entity.LoginUser;
@@ -70,6 +71,10 @@ public class HomeController {
             return result;
         }
 
+        if(sysUser.getType()==1){
+            result.error500("微信车主用户无权登录");
+            return result;
+        }
 
         String hashAlgorithmName = "MD5";//加密方式
         Object crdentials = loginUser.getPassword();//密码原值
@@ -88,6 +93,8 @@ public class HomeController {
         try {
             JwtToken jwtToken = new JwtToken(userToken(sysUser, result));
             subject.login(jwtToken);//这个最终就是调用的doGetAuthenticationInfo
+
+            //以下验证是否打开了session
             //Session session = subject.getSession();
             //System.out.println("sessionId:" + session.getId());
             //System.out.println("sessionHost:" + session.getHost());
@@ -219,33 +226,41 @@ public class HomeController {
             Oauth2Token oauth2Token = getOauth2AccessToken(code);
             // 用户标识
             String openId = oauth2Token.getOpenId();
-            logger.info("***********************************oauth2Token信息："+oauth2Token.toString()+"XX_"+openId);
+            logger.info("*************oauth2Token信息："+oauth2Token.toString()+"XX_"+openId);
 
             //1. 校验用户是否有效
-//            QueryWrapper<SysUser> query = new QueryWrapper<>();
-//            query.eq("openid", openId);
-//            if(type!=null){
-//                query.eq("type", type);
-//            }
-//
-//            List<SysUser> sysUsers = sysUserService.list();
-//            if(sysUsers.size()>0){
-//                SysUser sysUser=sysUsers.get(0);
-//                result = sysUserService.checkUserIsEffective(sysUser);
-//                if(!result.isSuccess()) {
-//                    return result;
-//                }
-//                sysUser.setOpenid(openId);
-//                //用户登录信息
-//                userInfo(sysUser, result);
-//                sysBaseAPI.addLog("openId: " + openId + ",登录成功！", CommonConstant.LOG_TYPE_1, null);
-//                sysUser.setLastLoginTime(new Date());
-//                sysUserService.updateById(sysUser);
-//            }else{
-//                result.setCode(201);
-//                result.setMessage(openId);
-//                return result;
-//            }
+            SysUser weChatUser =  sysUserService.queryUserByAccount(openId);
+
+            if(!oConvertUtils.isEmpty(weChatUser)){
+
+                //用户登录信息
+                userToken(weChatUser, result);
+                logger.info("openId: " + openId + ",登录成功！", CommonConstant.LOG_TYPE_1, null);
+                weChatUser.setLoginTime(new Date());
+                sysUserService.updateUser(weChatUser);
+            }else{
+                SysUser user=new SysUser();
+                user.setPassword("WX111111");
+                user.setAccount(openId);
+                String salt = oConvertUtils.randomGen(8);
+                user.setSalt(salt);
+
+                String hashAlgorithmName = "MD5";//加密方式
+                Object crdentials = "WX111111";//密码原值
+
+                int hashIterations = 1;//加密1次
+                Object passwordEncode = new SimpleHash(hashAlgorithmName,crdentials,salt,hashIterations);
+
+                user.setPassword(passwordEncode.toString());
+                user.setState(1);
+
+                user.setOpenid(openId);
+                user.setType(1);
+                user.setLoginTime(new Date());
+                sysUserService.saveUser(user,"1");
+                userToken(user, result);
+                return result;
+            }
         }
         return result;
     }

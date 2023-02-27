@@ -24,11 +24,11 @@ public class ShiroSessionManager extends DefaultWebSessionManager {
         String id = WebUtils.toHttp(request).getHeader(HEADER_TOKEN_NAME);
         if (oConvertUtils.isEmpty(id)) {
             // 按照默认规则从cookie中获取SessionId
-            System.out.println("按照默认规则从cookie中获取SessionId");
+            //System.out.println("按照默认规则从cookie中获取SessionId");
             return super.getSessionId(request, response);
         } else {
             // 从Header头中获取sessionId
-            System.out.println("从Header头中获取sessionId"+id);
+            //System.out.println("从Header头中获取sessionId"+id);
             request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID, id);
             request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_IS_VALID, Boolean.TRUE);
             return id;

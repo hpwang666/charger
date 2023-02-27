@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
+import java.util.List;
 
 @Mapper
 public interface YlcChargerMapper {
@@ -15,4 +16,6 @@ public interface YlcChargerMapper {
      //更新充电桩的状态  以及是否插枪
      void updateStatus(@Param("serialNum")String serialNum,@Param("plugStatus") Integer plugStatus,
                        @Param("plugHoming") Integer plugHoming,@Param("slotIn") Integer slotIn);
+
+     List<YlcCharger> queryChargersByDepId(String departId);
 }

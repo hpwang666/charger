@@ -3,6 +3,7 @@ package com.wwp.service;
 import com.wwp.entity.YlcCharger;
 
 import java.util.Date;
+import java.util.List;
 
 public interface IYlcChargerService {
      void add(YlcCharger ylcCharger);
@@ -17,4 +18,6 @@ public interface IYlcChargerService {
 
      //这里会检查充电桩是否在线，是否可用
      boolean checkChargerAvailable(String serialNum);
+
+     List<YlcCharger> queryChargersByDepId(String departId);
 }

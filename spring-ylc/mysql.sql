@@ -98,7 +98,7 @@ CREATE TABLE `ylc_user_order` (
   `order_num` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '交易流水号',
    PRIMARY KEY (`id`) USING BTREE,
    KEY `index_id` (`id`) USING BTREE,
-   KEY `index_order_id` (`order_id`) USING BTREE
+   KEY `index_order_num` (`order_num`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 DROP TABLE IF EXISTS `ylc_user_logical`;

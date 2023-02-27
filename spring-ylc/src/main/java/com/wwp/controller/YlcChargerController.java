@@ -1,6 +1,7 @@
 package com.wwp.controller;
 
 import com.wwp.devices.YlcDeviceMap;
+import com.wwp.entity.YlcCharger;
 import com.wwp.entity.YlcUserLogical;
 import com.wwp.model.YlcCtrlMsg;
 import com.wwp.model.YlcResult;
@@ -17,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/charger")
-public class YlcCharger {
+public class YlcChargerController {
     @Resource
     IYlcCtrlService ylcCtrlService;
 
@@ -36,9 +37,16 @@ public class YlcCharger {
 
     }
 
+    @RequestMapping(value="/list",method= RequestMethod.GET)
+    public Result<List<YlcCharger>> queryChargerList(@RequestParam String departId)
+    {
+        List<YlcCharger> chargers = ylcChargerService.queryChargersByDepId(departId);
+        return Result.OK("查询成功",chargers);
+    }
+
     @RequestMapping(value="/remoteOn",method= RequestMethod.GET)
     @ApiOperation("APP充电申请")
-    public Result queryChargerList(@RequestParam String chargerId) {
+    public Result remoteOn(@RequestParam String chargerId) {
 
 
         if(ylcChargerService.checkChargerAvailable(chargerId)) {
