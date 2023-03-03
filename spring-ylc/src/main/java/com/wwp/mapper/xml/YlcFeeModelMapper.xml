@@ -2,13 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.wwp.mapper.YlcFeeModelMapper">
 
+	<insert id="add" parameterType="com.wwp.entity.YlcFeeModel">
+        INSERT INTO ylc_fee_model set id=#{id} ,model_code=#{modelCode},fee0=#{fee0},fee1=#{fee1},fee2=#{fee2},fee3=#{fee3},`loss_rate`=#{lossRate},
+                                    fees_by_model=#{feesByModel}
+    </insert>
 
 
-
-    <select id="getFeeModelByCode" resultType="com.wwp.entity.YlcFeeModel">
-		select * from  ylc_fee_model where model_code = #{modelCode}
+    <select id="getFeeModelById" resultType="com.wwp.entity.YlcFeeModel">
+		select * from  ylc_fee_model where id = #{id}
 	</select>
 
 
-
+	<update id="updateFeeModel" parameterType="com.wwp.entity.YlcFeeModel">
+		update ylc_fee_model
+		<trim prefix="set" suffixOverrides=",">
+			<if test="fee0!=null">`fee0`=#{fee0,jdbcType=VARCHAR},</if>
+			<if test="fee1!=null">`fee1`=#{fee1,jdbcType=VARCHAR},</if>
+			<if test="fee2!=null">`fee2`=#{fee2,jdbcType=VARCHAR},</if>
+			<if test="fee3!=null">`fee3`=#{fee3,jdbcType=VARCHAR},</if>
+			<if test="lossRate!=null">loss_rate=#{lossRate,jdbcType=INTEGER},</if>
+			<if test="feesByModel!=null">fees_by_model=#{feesByModel,jdbcType=VARCHAR},</if>
+		</trim>
+		WHERE id =#{id,jdbcType=VARCHAR}
+	</update>
 </mapper>

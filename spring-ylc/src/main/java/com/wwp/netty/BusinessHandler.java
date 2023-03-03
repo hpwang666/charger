@@ -173,7 +173,7 @@ public class BusinessHandler extends ChannelInboundHandlerAdapter {
     private void getModelHandle(YlcResult result)
     {
 
-        YlcFeeModel ylcFeeModel = ((YlcFeeModelMapper)SpringBeanUtils.getApplicationContext().getBean(YlcFeeModelMapper.class)).getFeeModelByCode("1324");
+        YlcFeeModel ylcFeeModel = ((YlcFeeModelMapper)SpringBeanUtils.getApplicationContext().getBean(YlcFeeModelMapper.class)).getFeeModelById("1260185893546841122");
         if(ylcFeeModel != null){
             System.out.println("fee0: "+ ylcFeeModel.getFee0());
             result.setResult(ylcFeeModel);

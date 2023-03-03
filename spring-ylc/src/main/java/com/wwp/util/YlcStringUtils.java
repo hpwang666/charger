@@ -308,6 +308,21 @@ public class YlcStringUtils {
 
         return sb.toString();
     }
+
+    static public String genSerialNum()
+    {
+        char[] chars = "01020304050607080901234567891213141526272829313233343546474849".toCharArray();
+        int length = chars.length;
+
+        StringBuffer sb = new StringBuffer ();
+        sb.append("5800");
+        for (int i = 0; i < 10; i++){
+            char achar = chars[new Random().nextInt(length)];
+            sb.append(achar);
+        }
+
+        return sb.toString();
+    }
 }
 
 

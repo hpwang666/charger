@@ -5,5 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface YlcFeeModelMapper {
-    YlcFeeModel getFeeModelByCode(String modelCode);
+    YlcFeeModel getFeeModelById(String id);
+    void updateFeeModel(YlcFeeModel ylcFeeModel);
+    void add(YlcFeeModel ylcFeeModel);
 }

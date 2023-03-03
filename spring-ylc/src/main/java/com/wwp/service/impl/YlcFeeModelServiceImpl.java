@@ -14,9 +14,21 @@ public class YlcFeeModelServiceImpl implements IYlcFeeModelService {
     YlcFeeModelMapper ylcFeeModelMapper;
 
     @Override
-    public YlcFeeModel getFeeModel(String modelCode)
+    public YlcFeeModel getFeeModel(String id)
     {
-        return ylcFeeModelMapper.getFeeModelByCode(modelCode);
+        return ylcFeeModelMapper.getFeeModelById(id);
+    }
+
+    @Override
+    public void updateFeeModel(YlcFeeModel ylcFeeModel)
+    {
+        ylcFeeModelMapper.updateFeeModel(ylcFeeModel);
+    }
+
+    @Override
+    public void addFeeModel(YlcFeeModel ylcFeeModel)
+    {
+        ylcFeeModelMapper.add(ylcFeeModel);
     }
 
 }

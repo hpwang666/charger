@@ -16,7 +16,7 @@ public class YlcFeeModel implements Serializable {
     private String modelCode;
 
     //将尖电费费率：40 0D 03 00 尖服务费费率：9C 40 00 00 转换成大端字节序存储为字符串(方便阅读查询)
-    // "00030D40" "0000409C"
+    // "00030D40 0000409C"
     private String fee0;//尖
 
     private String fee1;//峰
@@ -45,21 +45,44 @@ public class YlcFeeModel implements Serializable {
 
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
 
     public String getFee0() {
         return fee0;
+    }
+
+    public void setFee0(String fee0) {
+        this.fee0 = fee0;
     }
 
     public String getFee1() {
         return fee1;
     }
 
+    public void setFee1(String fee1) {
+        this.fee1 = fee1;
+    }
+
     public String getFee2() {
         return fee2;
     }
 
+    public void setFee2(String fee2) {
+        this.fee2 = fee2;
+    }
+
     public String getFee3() {
         return fee3;
+    }
+
+    public void setFee3(String fee3) {
+        this.fee3 = fee3;
     }
 
     public void setModelCode(String modelCode) {

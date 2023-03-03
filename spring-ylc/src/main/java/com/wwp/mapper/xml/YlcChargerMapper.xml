@@ -4,16 +4,16 @@
 
 
     <insert id="add" parameterType="com.wwp.entity.YlcCharger">
-        INSERT INTO ylc_charger set id=#{id} ,serial_num=#{serialNum},depart_id=#{departId},`type`=#{type},plugs=#{plugs},model_code=#{modelCode},
+        INSERT INTO ylc_charger set id=#{id} ,serial_num=#{serialNum},depart_id=#{departId},`type`=#{type},plugs=#{plugs},model_id=#{modelId},
                                     plug_status=#{plugStatus}
     </insert>
 
-    <select id="getDevCharger" resultType="com.wwp.entity.YlcCharger">
+    <select id="getChargerBySerialNum" resultType="com.wwp.entity.YlcCharger">
 		select * from  ylc_charger where serial_num = #{serialNum}
 	</select>
 
     <select id="queryChargersByDepId" resultType="com.wwp.entity.YlcCharger">
-		select * from  ylc_charger where depart_id = #{departId}
+		select * from  ylc_charger where depart_id = #{departId} and del_flag != 1
 	</select>
 
     <update id="updateTime">
@@ -28,6 +28,14 @@
             <if test="plugStatus!=null">`plug_status`=#{plugStatus,jdbcType=INTEGER},</if>
             <if test="plugHoming!=null">plug_homing=#{plugHoming,jdbcType=INTEGER},</if>
             <if test="slotIn!=null">slot_in=#{slotIn,jdbcType=INTEGER},</if>
+        </trim>
+        WHERE serial_num =#{serialNum,jdbcType=VARCHAR}
+    </update>
+
+    <update id="update" parameterType="com.wwp.entity.YlcCharger">
+        update ylc_charger
+        <trim prefix="set" suffixOverrides=",">
+            <if test="delFlag!=null">del_flag=#{delFlag,jdbcType=INTEGER},</if>
         </trim>
         WHERE serial_num =#{serialNum,jdbcType=VARCHAR}
     </update>

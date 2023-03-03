@@ -11,7 +11,7 @@ CREATE TABLE `ylc_charger` (
   `depart_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '所属车场',
   `type` tinyint(1) NULL DEFAULT 0 COMMENT '充电桩类型 ',
   `plugs` tinyint(1) NULL DEFAULT 0 COMMENT '充电枪数量 ',
-  `model_code` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '计费编码模型',
+  `model_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '计费编码Id',
   `plug_status` tinyint(1)  NULL DEFAULT 0 COMMENT '0x00：离线   0x01：故障  0x02：空闲  0x03：充电',
   `plug_homing` tinyint(1)  NULL DEFAULT 0 COMMENT '枪是否归位 0--否  1--是  2--未知',
   `slot_in` tinyint(1) NULL DEFAULT 0 COMMENT '是否插枪 0--否  1--是 ',
@@ -22,7 +22,7 @@ CREATE TABLE `ylc_charger` (
   KEY `index_serial_num` (`serial_num`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-INSERT INTO `ylc_charger` VALUES ('1260185893546840066', '32010600213533', '1223', 1, 1, '0001', 1, 1,1,1,NULL,0);
+INSERT INTO `ylc_charger` VALUES ('1260185893546840066', '32010600213533', '1223', 1, 1, '1260185893546841122', 1, 1,1,1,NULL,0);
 
 
 DROP TABLE IF EXISTS `ylc_fee_model`;

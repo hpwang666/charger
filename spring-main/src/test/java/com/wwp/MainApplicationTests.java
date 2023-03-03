@@ -17,39 +17,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 import java.util.List;
 
-@ComponentScan(basePackages={"com.wwp.common.aspect.annotation"})
+//@ComponentScan(basePackages={"com.wwp.common.aspect.annotation"})
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes= MainApplication.class)
+//@SpringBootTest(classes= MainApplication.class)
 public class MainApplicationTests {
 
-    @Autowired
-    private ISysUserRoleService sysUserRoleService;
-
-    @Autowired
-    private SysUserRoleMapper sysUserRoleMapper;
-
-    @Autowired
-    private ISysPermissionService sysPermissionService;
-
-    @Autowired
-    private SysLogService sysLogService;
-
-    @Autowired
-    private SysPermissionMapper sysPermissionMapper;
-
     @Test
-    @AutoLog(value = "jojo")
-    public void contextLoads() throws Exception{
+    public void testFeeModel() throws Exception
+    {
+        String fee="000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+        if(fee.length()!=96) throw new ParseException("字段错误");
 
-        List<String> list = new ArrayList<>();
-        list.add("1");
-        list.add("2");
-
-        List<TreeModel> permissions = sysPermissionService.queryListByParentId("1");
-        if(permissions.size()>0){
-            for(TreeModel p : permissions)
-                System.out.println(p.getTitle());
-        }
+        S
     }
 
 }

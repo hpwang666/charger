@@ -7,8 +7,13 @@ import cn.hutool.core.io.checksum.crc16.CRC16XModem;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ByteUtil;
 import cn.hutool.core.util.HexUtil;
-import com.wwp.entity.YlcCharger;
-import com.wwp.entity.YlcChargerStatus;
+import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
+import com.wwp.entity.*;
+import com.wwp.mapper.YlcChargerMapper;
 import com.wwp.service.impl.YlcChargerServiceImpl;
 import com.wwp.service.impl.YlcUserLogicServiceImpl;
 import com.wwp.util.YlcStringUtils;
@@ -20,14 +25,18 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
+import io.swagger.models.auth.In;
+import org.apache.http.ParseException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 
 import javax.annotation.Resource;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +56,9 @@ public class MainApplicationTests {
     @Resource
     YlcChargerServiceImpl ylcChargerService;
 
+    @Resource
+    YlcChargerMapper ylcChargerMapper;
+
 
     public void testBean()
     {
@@ -58,6 +70,84 @@ public class MainApplicationTests {
 
     }
 
+    @Test
+    public void test()
+    {
+        YlcCharger charger = ylcChargerMapper.getChargerBySerialNum("580074859933074");
+
+        charger.setDelFlag(3);
+        ylcChargerMapper.update(charger);
+    }
+
+    public void testFeeModel() throws Exception
+    {
+        String fee="000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+        if(fee.length()!=96) throw new ParseException("字段长度错误");
+
+        List<String> timeZone = new ArrayList<>(48);
+        for (int i = 0; i < 48; i++) {
+            timeZone.add(StrUtil.sub(fee,i*2,(i*2)+2));
+        }
+
+        String s = timeZone.get(0);
+        JSONArray jsonArray = new JSONArray();
+        JSONObject obj = new JSONObject();
+
+        Date endTime = DateUtil.parse("00:00","HH:mm");
+        obj.put("startTime",DateUtil.format(endTime, "HH:mm"));
+
+        for(int i =0;i<timeZone.size();i++)
+        {
+            if(!timeZone.get(i).equals(s)){
+                obj.put("endTime",DateUtil.format(endTime, "HH:mm"));
+                obj.put("rate",s);
+                jsonArray.add(obj);
+                obj = new JSONObject();
+                obj.put("startTime",DateUtil.format(endTime, "HH:mm"));
+                s= timeZone.get(i);
+            }
+            if(i==timeZone.size()-1){
+                obj.put("endTime","23:59");
+                obj.put("rate",timeZone.get(i));
+                jsonArray.add(obj);
+            }
+            endTime =DateUtil.offsetMinute(endTime,30);
+
+        }
+        obj = new JSONObject();
+        obj.put("timeZone",jsonArray);
+        System.out.println(obj);
+
+    }
+
+
+    public void time2FeeModel() throws Exception
+    {
+        String timeZone =  "{\"timeZone\":[{\"rate\":\"00\",\"startTime\":\"00:00\",\"endTime\":\"00:30\"},{\"rate\":\"01\",\"startTime\":\"00:30\",\"endTime\":\"01:00\"},{\"rate\":\"05\",\"startTime\":\"01:00\",\"endTime\":\"23:59\"}]}";
+       // String timeZone =  "{\"timeZone\":[{\"rate\":\"00\",\"startTime\":\"00:00\",\"endTime\":\"23:59\"}]}";
+
+        JSONArray f= JSON.parseObject(timeZone).getJSONArray("timeZone");
+        Date start,end;
+        Integer index =0;
+        StringBuilder feeBuilder = new StringBuilder(100);
+        for(int i=0;i<f.size();i++)
+        {
+            start = DateUtil.parse((String)f.getJSONObject(i).get("startTime"),"HH:mm");
+            end = DateUtil.parse((String)f.getJSONObject(i).get("endTime"),"HH:mm");
+            while(!DateUtil.isSameTime(start,end) && index<48){
+                feeBuilder.append((String)f.getJSONObject(i).get("rate"));
+                index++;
+                start =DateUtil.offsetMinute(start,30);
+            }
+
+        }
+        if(feeBuilder.length()!=96)
+            throw new ParseException("时间分段转换错误");
+
+        System.out.println(feeBuilder.length()+feeBuilder.toString());
+
+
+    }
     public  void testServer()
     {
         ChannelInitializer i = new ChannelInitializer<EmbeddedChannel>() {
@@ -86,7 +176,7 @@ public class MainApplicationTests {
     }
 
 
-    @Test
+
     public void testBUffer()
     {
         ByteBuffer buffer = ByteBuffer.allocate(6);
@@ -187,13 +277,12 @@ public class MainApplicationTests {
         //但是不用反转 直接小端模式
         System.out.println(ByteUtil.bytesToInt(b2));
 
-        System.out.println(HexUtil.encodeHexStr(ByteUtil.intToBytes(I1)));//转换出来一定是4个字节
-
+        System.out.println(HexUtil.encodeHexStr(ByteUtil.intToBytes(I1)));//转换出来一定是4个字节,是小端序
+        System.out.println(HexUtil.toHex(I1));//转换出来是是小端序
 
         //当字节数组是小端序  可以转换成大端方便阅读
         String str4 = HexUtil.encodeHexStr(ArrayUtil.reverse(b2));
         System.out.println("b2 reverse: "+str4+" "+ HexUtil.hexToLong(str4));
-
 
 
     }

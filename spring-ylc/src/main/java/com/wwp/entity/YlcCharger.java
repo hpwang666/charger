@@ -23,8 +23,8 @@ public class YlcCharger implements Serializable {
     //充电枪数量
     private Integer plugs;
 
-    //计费模型B64编码
-    private String modelCode;
+    //计费模型id
+    private String modelId;
 
 
     //0x00：离线   0x01：故障  0x02：空闲  0x03：充电
@@ -107,11 +107,11 @@ public class YlcCharger implements Serializable {
         this.errorCode = errorCode;
     }
 
-    public void setModelCode(String modelCode) {
-        this.modelCode = modelCode;
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
-    public String getModelCode() {
-        return modelCode;
+    public String getModelId() {
+        return modelId;
     }
 
     public void setUpdateTime(Date updateTime) {
